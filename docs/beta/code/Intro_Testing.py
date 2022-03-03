@@ -3,7 +3,7 @@
 
 # "Introduction to Software Testing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Intro_Testing.html
-# Last change: 2021-06-02 17:40:24+02:00
+# Last change: 2022-01-11 10:04:13+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -62,6 +62,10 @@ if __name__ == '__main__':
 
 
 
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('wFuQ4Mju5dU')
+
 ## Simple Testing
 ## --------------
 
@@ -105,6 +109,17 @@ if __name__ == '__main__':
     print('\n### Interacting with Notebooks')
 
 
+
+from .bookutils import quiz
+
+if __name__ == '__main__':
+    quiz("What does `my_sqrt(16)` produce?", 
+         [
+            "4",
+            "4.0",
+            "3.99999",
+            "None"
+         ], "len('four') - len('two') + 1")
 
 ### Debugging a Function
 
@@ -223,6 +238,14 @@ def my_sqrt_checked(x):
 if __name__ == '__main__':
     my_sqrt_checked(2.0)
 
+if __name__ == '__main__':
+    quiz("Does run-time checking give a guarantee "
+         "that there will always be a correct result?",
+         [
+             "Yes",
+             "No",
+         ], "1 ** 1 + 1 ** 1")
+
 ## System Input vs Function Input
 ## ------------------------------
 
@@ -231,7 +254,7 @@ if __name__ == '__main__':
 
 
 
-def sqrt_program(arg):
+def sqrt_program(arg: str) -> None:  # type: ignore
     x = int(arg)
     print('The root of', x, 'is', my_sqrt(x))
 
@@ -244,7 +267,7 @@ if __name__ == '__main__':
     with ExpectTimeout(1):
         sqrt_program("-1")
 
-def sqrt_program(arg):
+def sqrt_program(arg: str) -> None:  # type: ignore
     x = int(arg)
     if x < 0:
         print("Illegal Input")
@@ -254,13 +277,22 @@ def sqrt_program(arg):
 if __name__ == '__main__':
     sqrt_program("-1")
 
+if __name__ == '__main__':
+    quiz("What is the result of `sqrt_program('xyzzy')`?",
+         [
+             "0",
+             "0.0",
+             "`None`",
+             "An exception"
+         ], "16 ** 0.5")
+
 from .ExpectError import ExpectError
 
 if __name__ == '__main__':
     with ExpectError():
         sqrt_program("xyzzy")
 
-def sqrt_program(arg):
+def sqrt_program(arg: str) -> None:  # type: ignore
     try:
         x = float(arg)
     except ValueError:

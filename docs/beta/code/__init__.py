@@ -33,5 +33,7 @@
 # from . import PrototypingWithPython
 # from . import ExpectError
 # from . import Timer
-# from . import ControlFlow
+# from . import Timeout
+# from . import ClassDiagram
 # from . import RailroadDiagrams
+# from . import ControlFlow

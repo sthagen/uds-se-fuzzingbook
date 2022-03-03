@@ -82,8 +82,10 @@ APPENDICES = \
 	PrototypingWithPython.ipynb \
 	ExpectError.ipynb \
 	Timer.ipynb \
-	ControlFlow.ipynb \
-	RailroadDiagrams.ipynb
+	Timeout.ipynb \
+	ClassDiagram.ipynb \
+	RailroadDiagrams.ipynb \
+	ControlFlow.ipynb
 
 # Additional notebooks for special pages (not to be included in distributions)
 FRONTMATTER = \
@@ -141,3 +143,7 @@ TODO_CHAPTERS = \
 	$(DOMAINS_PART_TODO) \
 	$(MANAGEMENT_PART_TODO)
 
+## Specific settings
+# No timeouts; debuggingbook/GreyboxFuzzer can take up to 10 minutes to run
+EXECUTE_TIMEOUT = 600
+TIME = time

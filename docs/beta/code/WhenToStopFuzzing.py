@@ -3,7 +3,7 @@
 
 # "When To Stop Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2021-06-08 13:01:16+02:00
+# Last change: 2022-02-21 09:34:28+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -63,12 +63,15 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('an9Z23l-xc0')
+
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
-from . import Fuzzer
-from . import Coverage
+from typing import Dict
 
 ## The Enigma Machine
 ## ------------------
@@ -89,14 +92,16 @@ import string
 
 if __name__ == '__main__':
     import numpy
-    from numpy.random import choice
-    from numpy.random import shuffle
     from numpy import log
+
+import random
 
 if __name__ == '__main__':
     letters = list(string.ascii_letters[26:])  # upper-case characters
     trigrams = [str(a + b + c) for a in letters for b in letters for c in letters]
-    shuffle(trigrams)
+
+if __name__ == '__main__':
+    random.shuffle(trigrams)
 
 if __name__ == '__main__':
     trigrams[:10]
@@ -110,7 +115,7 @@ if __name__ == '__main__':
         k_book[trigram] = log(1 + 1 / i) / log(26**3 + 1)
 
 if __name__ == '__main__':
-    random_trigram = choice(list(k_book.keys()), p=list(k_book.values()))
+    random_trigram = random.choices(list(k_book.keys()), weights=list(k_book.values()))[0]
     random_trigram
 
 if __name__ == '__main__':
@@ -134,13 +139,17 @@ class EnigmaMachine(Runner):
     def reset(self):
         """Resets the key register"""
         self.msg2key = {}
-        
+        self.cur_msg = ""
+
     def internal_msg2key(self, message):
         """Internal helper method. 
            Returns the trigram for an encoded message."""
-        if not message in self.msg2key:
-            # Simulating how an officer chooses a key from the Kenngruppenbuch to encode the message.
-            self.msg2key[message] = choice(list(self.k_book.keys()), p=list(self.k_book.values()))
+        if message not in self.msg2key:
+            # Simulating how an officer chooses a key from the Kenngruppenbuch
+            # to encode the message.
+            self.msg2key[message] = \
+                random.choices(list(self.k_book.keys()),
+                               weights=list(self.k_book.values()))[0]
         trigram = self.msg2key[message]
         return trigram
 
@@ -166,7 +175,7 @@ if __name__ == '__main__':
     enigma.cur_msg = "BrEaK mE. L0Lzz"
     enigma.run("AAA")
 
-class BletchleyPark(object):
+class BletchleyPark:
     def __init__(self, enigma):
         self.enigma = enigma
         self.enigma.reset()
@@ -175,7 +184,7 @@ class BletchleyPark(object):
             max_length=3,
             char_start=65,
             char_range=26)
-        
+
     def break_message(self, message):
         """Returning the trigram for an encoded message"""
         self.enigma.cur_msg = message
@@ -216,7 +225,7 @@ if __name__ == '__main__':
     n = 100  # messages to crack
 
 if __name__ == '__main__':
-    observed = defaultdict(int)
+    observed: Dict[str, int] = defaultdict(int)
     for msg in range(0, n):
         trigram = bletchley.break_message(msg)
         observed[trigram] += 1
@@ -239,8 +248,6 @@ if __name__ == '__main__':
         o_trigrams, singletons)
 
 class BletchleyPark(BletchleyPark):
-    
-    
     def break_message(self, message):
         """Returning the trigram for an encoded message"""
         # For the following experiment, we want to make it practical
@@ -254,7 +261,7 @@ class BletchleyPark(BletchleyPark):
         #         break
         trigram = enigma.internal_msg2key(message)
         return trigram
-    
+
     def break_n_messages(self, n):
         """Returns how often each trigram has been observed, 
            and #trigrams discovered for each message."""
@@ -265,12 +272,12 @@ class BletchleyPark(BletchleyPark):
         cur_observed = 0
         for cur_msg in range(0, n):
             trigram = self.break_message(cur_msg)
-            
+
             observed[trigram] += 1
             if (observed[trigram] == 1):
                 cur_observed += 1
             timeseries[cur_msg] = cur_observed
-            
+
         return (observed, timeseries)
 
 if __name__ == '__main__':
@@ -306,7 +313,7 @@ if __name__ == '__main__':
 # %matplotlib inline
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # type: ignore
 
 if __name__ == '__main__':
     frequencies = [v for k, v in observed.items() if int(v) > 0]
@@ -342,19 +349,18 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     print("Trigram : Frequency")
-    for trigram in sorted(observed, key=observed.get, reverse=True):
+    for trigram in sorted(observed, key=observed.get, reverse=True):  # type: ignore
         if observed[trigram] > 10:
             print("    %s : %d" % (trigram, observed[trigram]))
 
 class BletchleyPark(BletchleyPark):
-    
     def __init__(self, enigma):
         super().__init__(enigma)
         self.cur_attempts = 0
         self.cur_observed = 0
         self.observed = defaultdict(int)
         self.timeseries = [None] * max_attempts * 2
-    
+
     def break_message(self, message):
         """Returns the trigram for an encoded message, and
            track #trigrams observed as #attempts increases."""
@@ -366,19 +372,19 @@ class BletchleyPark(BletchleyPark):
             if outcome == self.enigma.PASS: 
                 break
         return trigram
-    
+
     def break_max_attempts(self, max_attempts):
         """Returns #messages successfully cracked after a given #attempts."""
-        cur_msg  = 0
+        cur_msg = 0
         n_messages = 0
 
         while True:
             trigram = self.break_message(cur_msg)
-            
+
             # stop when reaching max_attempts
             if self.cur_attempts >= max_attempts:
                 break
-                
+
             # update observed trigrams
             n_messages += 1
             self.observed[trigram] += 1
@@ -386,6 +392,7 @@ class BletchleyPark(BletchleyPark):
                 self.cur_observed += 1
                 self.timeseries[self.cur_attempts] = self.cur_observed
             cur_msg += 1
+
         return n_messages
 
 if __name__ == '__main__':
@@ -397,12 +404,15 @@ if __name__ == '__main__':
     original
 
 class BoostedBletchleyPark(BletchleyPark):
-    
+    def __init__(self, enigma, prior):
+        super().__init__(enigma)
+        self.prior = prior
+
     def break_message(self, message):
         """Returns the trigram for an encoded message, and
            track #trigrams observed as #attempts increases."""
         self.enigma.cur_msg = message
-        
+
         # boost cracking by trying observed trigrams first
         for trigram in sorted(self.prior, key=self.prior.get, reverse=True):
             self.cur_attempts += 1
@@ -410,13 +420,12 @@ class BoostedBletchleyPark(BletchleyPark):
             self.timeseries[self.cur_attempts] = self.cur_observed
             if outcome == self.enigma.PASS:
                 return trigram
-            
+
         # else fall back to normal cracking
         return super().break_message(message)
 
 if __name__ == '__main__':
-    boostedBletchley = BoostedBletchleyPark(enigma)
-    boostedBletchley.prior = observed
+    boostedBletchley = BoostedBletchleyPark(enigma, prior=observed)
     boosted = boostedBletchley.break_max_attempts(max_attempts)
     boosted
 
@@ -547,7 +556,6 @@ if __name__ == '__main__':
     all_coverage = population_trace_coverage([inp1, inp2, inp3], cgi_decode)[0]
     assert len(all_coverage) == 2
 
-from .Fuzzer import RandomFuzzer
 from .Coverage import population_coverage
 from html.parser import HTMLParser
 
@@ -795,7 +803,7 @@ if __name__ == '__main__':
 
 
 
-from .Coverage import population_coverage, Coverage
+from .Coverage import population_coverage
 ...
 
 def population_stmt_coverage(population, function):
@@ -837,12 +845,12 @@ if __name__ == '__main__':
 
 from .Fuzzer import RandomFuzzer
 from html.parser import HTMLParser
-...
+...;
 
 if __name__ == '__main__':
     trials = 2000  # increase to 10000 for better convergences. Will take a while..
 
-def my_parser(inp):
+def html_parser(inp):
     parser = HTMLParser()  # resets the HTMLParser object for every fuzz input
     parser.feed(inp)
 
@@ -908,16 +916,15 @@ if __name__ == '__main__':
                 discoveries += 1
         emp_timeseries.append(discoveries / repeats)
 
-# %matplotlib inline
-# import matplotlib.pyplot as plt
-# line_emp, = plt.semilogy(emp_timeseries, label="Empirical")
-# line_gt, = plt.semilogy(gt_timeseries, label="Good-Turing")
-# plt.legend(handles=[line_emp, line_gt])
-# plt.xticks(range(0, measurements + 1, int(measurements / 5)),
-#            range(0, trials + 1, int(trials / 5)))
-# plt.xlabel('# of fuzz inputs')
-# plt.ylabel('discovery probability')
-# plt.title('Discovery Probability Over Time');
+if __name__ == '__main__':
+    line_emp, = plt.semilogy(emp_timeseries, label="Empirical")
+    line_gt, = plt.semilogy(gt_timeseries, label="Good-Turing")
+    plt.legend(handles=[line_emp, line_gt])
+    plt.xticks(range(0, measurements + 1, int(measurements / 5)),
+               range(0, trials + 1, int(trials / 5)))
+    plt.xlabel('# of fuzz inputs')
+    plt.ylabel('discovery probability')
+    plt.title('Discovery Probability Over Time');
 
 ### Exercise 2: Extrapolate and Evaluate Statement Coverage
 

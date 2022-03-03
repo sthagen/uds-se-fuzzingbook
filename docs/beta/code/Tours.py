@@ -3,7 +3,7 @@
 
 # "Tours through the Book" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Tours.html
-# Last change: 2021-06-08 13:13:11+02:00
+# Last change: 2022-02-21 09:08:54+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -62,11 +62,15 @@ if __name__ == '__main__':
 
 
 
-if __name__ == '__main__':
-    from IPython.display import SVG
+from .bookutils import rich_output
 
 if __name__ == '__main__':
-    SVG(filename='PICS/Sitemap.svg')
+    if rich_output():
+        from IPython.display import SVG
+        sitemap = SVG(filename='PICS/Sitemap.svg')
+    else:
+        sitemap = None
+    sitemap
 
 ## The Pragmatic Programmer Tour
 ## -----------------------------
@@ -97,6 +101,22 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     print('\n## The Graduate Tour')
+
+
+
+## The Blackbox Tour
+## -----------------
+
+if __name__ == '__main__':
+    print('\n## The Blackbox Tour')
+
+
+
+## The Whitebox Tour
+## -----------------
+
+if __name__ == '__main__':
+    print('\n## The Whitebox Tour')
 
 
 

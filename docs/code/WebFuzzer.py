@@ -3,7 +3,7 @@
 
 # "Testing Web Applications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2021-06-04 16:11:46+02:00
+# Last change: 2022-02-21 09:29:26+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -65,6 +65,8 @@ Using it for fuzzing yields a path with all form values filled; accessing this p
 
 Repeated calls to `WebFormFuzzer.fuzz()` invoke the form again and again, each time with different (fuzzed) values.
 
+Internally, `WebFormFuzzer` builds on a helper class named `HTMLGrammarMiner`; you can extend its functionality to include more features.
+
 ### SQL Injection Attacks
 
 `SQLInjectionFuzzer` is an experimental extension of `WebFormFuzzer` whose constructor takes an additional _payload_ – an SQL command to be injected and executed on the server.  Otherwise, it is used like `WebFormFuzzer`:
@@ -75,8 +77,9 @@ Repeated calls to `WebFormFuzzer.fuzz()` invoke the form again and again, each t
 
 As you can see, the path to be retrieved contains the payload encoded into one of the form field values.
 
-`SQLInjectionFuzzer` is a proof-of-concept on how to build a malicious fuzzer; you should study and extend its code to make actual use of it.
+Internally, `SQLInjectionFuzzer` builds on a helper class named `SQLInjectionGrammarMiner`; you can extend its functionality to include more features.
 
+`SQLInjectionFuzzer` is a proof-of-concept on how to build a malicious fuzzer; you should study and extend its code to make actual use of it.
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Testing Web Applications"
@@ -97,6 +100,10 @@ if __name__ == '__main__':
 
 
 
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('5agY5kg8Pvk')
+
 ## Synopsis
 ## --------
 
@@ -113,15 +120,24 @@ if __name__ == '__main__':
 
 
 
-from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
-
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-    pass
-
-### Taking Orders
+### Excursion: Implementing a Web Server
 
 if __name__ == '__main__':
-    print('\n### Taking Orders')
+    print('\n### Excursion: Implementing a Web Server')
+
+
+
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPStatus  # type: ignore
+
+class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    """A simple HTTP server"""
+    pass
+
+#### Taking Orders
+
+if __name__ == '__main__':
+    print('\n#### Taking Orders')
 
 
 
@@ -129,6 +145,8 @@ if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
+
+from typing import NoReturn, Tuple, Dict, List, Optional, Union
 
 FUZZINGBOOK_SWAG = {
     "tshirt": "One FuzzingBook T-Shirt",
@@ -144,7 +162,8 @@ HTML_ORDER_FORM = """
   Yes! Please send me at your earliest convenience
   <select name="item">
   """
-# (We don't use h2, h3, etc. here as they interfere with the notebook table of contents)
+# (We don't use h2, h3, etc. here
+# as they interfere with the notebook table of contents)
 
 
 for item in FUZZINGBOOK_SWAG:
@@ -183,10 +202,10 @@ from .bookutils import HTML
 if __name__ == '__main__':
     HTML(HTML_ORDER_FORM)
 
-### Order Confirmation
+#### Order Confirmation
 
 if __name__ == '__main__':
-    print('\n### Order Confirmation')
+    print('\n#### Order Confirmation')
 
 
 
@@ -212,10 +231,10 @@ if __name__ == '__main__':
                                     city="Seattle",
                                     zip="98104"))
 
-### Terms and Conditions
+#### Terms and Conditions
 
 if __name__ == '__main__':
-    print('\n### Terms and Conditions')
+    print('\n#### Terms and Conditions')
 
 
 
@@ -238,11 +257,10 @@ HTML_TERMS_AND_CONDITIONS = """
 if __name__ == '__main__':
     HTML(HTML_TERMS_AND_CONDITIONS)
 
-## Storing Orders
-## --------------
+#### Storing Orders
 
 if __name__ == '__main__':
-    print('\n## Storing Orders')
+    print('\n#### Storing Orders')
 
 
 
@@ -257,7 +275,9 @@ def init_db():
 
     db_connection = sqlite3.connect(ORDERS_DB)
     db_connection.execute("DROP TABLE IF EXISTS orders")
-    db_connection.execute("CREATE TABLE orders (item text, name text, email text, city text, zip text)")
+    db_connection.execute("CREATE TABLE orders "
+                          "(item text, name text, email text, "
+                          "city text, zip text)")
     db_connection.commit()
 
     return db_connection
@@ -270,7 +290,8 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     db.execute("INSERT INTO orders " +
-               "VALUES ('lockset', 'Walter White', 'white@jpwynne.edu', 'Albuquerque', '87101')")
+               "VALUES ('lockset', 'Walter White', "
+               "'white@jpwynne.edu', 'Albuquerque', '87101')")
     db.commit()
 
 if __name__ == '__main__':
@@ -283,14 +304,14 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     print(db.execute("SELECT * FROM orders").fetchall())
 
-### Handling HTTP Requests
+#### Handling HTTP Requests
 
 if __name__ == '__main__':
-    print('\n### Handling HTTP Requests')
+    print('\n#### Handling HTTP Requests')
 
 
 
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         try:
             # print("GET " + self.path)
@@ -305,10 +326,10 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         except Exception:
             self.internal_server_error()
 
-#### Order Form
+##### Order Form
 
 if __name__ == '__main__':
-    print('\n#### Order Form')
+    print('\n##### Order Form')
 
 
 
@@ -326,10 +347,10 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(HTML_TERMS_AND_CONDITIONS.encode("utf8"))
 
-#### Processing Orders
+##### Processing Orders
 
 if __name__ == '__main__':
-    print('\n#### Processing Orders')
+    print('\n##### Processing Orders')
 
 
 
@@ -375,10 +396,10 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(confirmation)
 
-#### Other HTTP commands
+##### Other HTTP commands
 
 if __name__ == '__main__':
-    print('\n#### Other HTTP commands')
+    print('\n##### Other HTTP commands')
 
 
 
@@ -389,17 +410,17 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Content-type", "text/html")
         self.end_headers()
 
-### Error Handling
+#### Error Handling
 
 if __name__ == '__main__':
-    print('\n### Error Handling')
+    print('\n#### Error Handling')
 
 
 
-#### Page Not Found
+##### Page Not Found
 
 if __name__ == '__main__':
-    print('\n#### Page Not Found')
+    print('\n##### Page Not Found')
 
 
 
@@ -427,10 +448,10 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         message = HTML_NOT_FOUND
         self.wfile.write(message.encode("utf8"))
 
-#### Internal Errors
+##### Internal Errors
 
 if __name__ == '__main__':
-    print('\n#### Internal Errors')
+    print('\n##### Internal Errors')
 
 
 
@@ -465,14 +486,14 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         message = HTML_INTERNAL_SERVER_ERROR.format(error_message=exc)
         self.wfile.write(message.encode("utf8"))
 
-### Logging
+#### Logging
 
 if __name__ == '__main__':
-    print('\n### Logging')
+    print('\n#### Logging')
 
 
 
-from multiprocessing import Queue
+from multiprocess import Queue  # type: ignore
 
 HTTPD_MESSAGE_QUEUE = Queue()
 
@@ -482,7 +503,7 @@ HTTPD_MESSAGE_QUEUE.put("I am one more message")
 
 from .bookutils import rich_output, terminal_escape
 
-def display_httpd_message(message):
+def display_httpd_message(message: str) -> None:
     if rich_output():
         display(
             HTML(
@@ -506,25 +527,23 @@ if __name__ == '__main__':
     time.sleep(1)
     print_httpd_messages()
 
-def clear_httpd_messages():
+def clear_httpd_messages() -> None:
     while not HTTPD_MESSAGE_QUEUE.empty():
         HTTPD_MESSAGE_QUEUE.get()
 
 class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
-    def log_message(self, format, *args):
+    def log_message(self, format: str, *args) -> None:
         message = ("%s - - [%s] %s\n" %
                    (self.address_string(),
                     self.log_date_time_string(),
                     format % args))
         HTTPD_MESSAGE_QUEUE.put(message)
 
-if __name__ == '__main__':
-    import requests
+import requests
 
-def webbrowser(url, mute=False):
-    """Download the http/https resource given by the URL"""
-    import requests  # for imports
-    
+def webbrowser(url: str, mute: bool = False) -> str:
+    """Download and return the http/https resource given by the URL"""
+
     try:
         r = requests.get(url)
         contents = r.text
@@ -536,6 +555,13 @@ def webbrowser(url, mute=False):
 
     return contents
 
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
+
 ### Running the Server
 
 if __name__ == '__main__':
@@ -543,7 +569,7 @@ if __name__ == '__main__':
 
 
 
-def run_httpd_forever(handler_class):
+def run_httpd_forever(handler_class: type) -> NoReturn:  # type: ignore
     host = "127.0.0.1"  # localhost IP
     for port in range(8800, 9000):
         httpd_address = (host, port)
@@ -558,9 +584,10 @@ def run_httpd_forever(handler_class):
     HTTPD_MESSAGE_QUEUE.put(httpd_url)
     httpd.serve_forever()
 
-from multiprocessing import Process
+from multiprocess import Process
 
-def start_httpd(handler_class=SimpleHTTPRequestHandler):
+def start_httpd(handler_class: type = SimpleHTTPRequestHandler) \
+        -> Tuple[Process, str]:
     clear_httpd_messages()
 
     httpd_process = Process(target=run_httpd_forever, args=(handler_class,))
@@ -587,7 +614,7 @@ if __name__ == '__main__':
 
 
 
-def print_url(url):
+def print_url(url: str) -> None:
     if rich_output():
         display(HTML('<pre><a href="%s">%s</a></pre>' % (url, url)))
     else:
@@ -672,9 +699,16 @@ if __name__ == '__main__':
 
 
 
+#### Excursion: Implementing cgi_decode()
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Implementing cgi_decode()')
+
+
+
 import string
 
-def cgi_encode(s, do_not_encode=""):
+def cgi_encode(s: str, do_not_encode: str = "") -> str:
     ret = ""
     for c in s:
         if (c in string.ascii_letters or c in string.digits
@@ -698,9 +732,16 @@ from .Coverage import cgi_decode  # minor dependency
 if __name__ == '__main__':
     cgi_decode(s)
 
-from .Grammars import crange, is_valid_grammar, syntax_diagram
+#### End of Excursion
 
-ORDER_GRAMMAR = {
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
+from .Grammars import crange, is_valid_grammar, syntax_diagram, Grammar
+
+ORDER_GRAMMAR: Grammar = {
     "<start>": ["<order>"],
     "<order>": ["/order?item=<item>&name=<name>&email=<email>&city=<city>&zip=<zip>"],
     "<item>": ["tshirt", "drill", "lockset"],
@@ -768,10 +809,12 @@ if __name__ == '__main__':
 from .Fuzzer import Runner
 
 class WebRunner(Runner):
-    def __init__(self, base_url=None):
+    """Runner for a Web server"""
+
+    def __init__(self, base_url: str = None):
         self.base_url = base_url
 
-    def run(self, url):
+    def run(self, url: str) -> Tuple[str, str]:
         if self.base_url is not None:
             url = urljoin(self.base_url, url)
 
@@ -824,13 +867,20 @@ if __name__ == '__main__':
 from html.parser import HTMLParser
 
 class FormHTMLParser(HTMLParser):
-    def reset(self):
+    """A parser for HTML forms"""
+
+    def reset(self) -> None:
         super().reset()
-        self.action = ""  # Form action
-        # Map of field name to type (or selection name to [option_1, option_2,
-        # ...])
-        self.fields = {}
-        self.select = []  # Stack of currently active selection names
+
+        # Form action  attribute (a URL)
+        self.action = ""
+
+        # Map of field name to type
+        # (or selection name to [option_1, option_2, ...])
+        self.fields: Dict[str, List[str]] = {}
+
+        # Stack of currently active selection names
+        self.select: List[str] = [] 
 
 class FormHTMLParser(FormHTMLParser):
     def handle_starttag(self, tag, attrs):
@@ -868,8 +918,12 @@ class FormHTMLParser(FormHTMLParser):
         if tag == "select":
             self.select.pop()
 
-class HTMLGrammarMiner(object):
-    def __init__(self, html_text):
+class HTMLGrammarMiner:
+    """Mine a grammar from a HTML form"""
+
+    def __init__(self, html_text: str) -> None:
+        """Constructor. `html_text` is the HTML string to parse."""
+
         html_parser = FormHTMLParser()
         html_parser.feed(html_text)
         self.fields = html_parser.fields
@@ -892,7 +946,7 @@ if __name__ == '__main__':
 from .Grammars import crange, srange, new_symbol, unreachable_nonterminals, CGI_GRAMMAR, extend_grammar
 
 class HTMLGrammarMiner(HTMLGrammarMiner):
-    QUERY_GRAMMAR = extend_grammar(CGI_GRAMMAR, {
+    QUERY_GRAMMAR: Grammar = extend_grammar(CGI_GRAMMAR, {
         "<start>": ["<action>?<query>"],
 
         "<text>": ["<string>"],
@@ -914,14 +968,16 @@ class HTMLGrammarMiner(HTMLGrammarMiner):
         # Stick to printable characters to avoid logging problems
         "<percent>": ["%<hexdigit-1><hexdigit>"],
         "<hexdigit-1>": srange("34567"),
-        
+
         # Submissions:
         "<submit>": [""]
     })
 
 class HTMLGrammarMiner(HTMLGrammarMiner):
-    def mine_grammar(self):
-        grammar = extend_grammar(self.QUERY_GRAMMAR)
+    def mine_grammar(self) -> Grammar:
+        """Extract a grammar from the given HTML text"""
+
+        grammar: Grammar = extend_grammar(self.QUERY_GRAMMAR)
         grammar["<action>"] = [self.action]
 
         query = ""
@@ -943,7 +999,7 @@ class HTMLGrammarMiner(HTMLGrammarMiner):
                 # List of values
                 value_symbol = new_symbol(grammar, "<" + field + "-value>")
                 grammar[field_symbol] = [field + "=" + value_symbol]
-                grammar[value_symbol] = field_type
+                grammar[value_symbol] = field_type  # type: ignore
 
         grammar["<query>"] = [query]
 
@@ -990,17 +1046,39 @@ if __name__ == '__main__':
 
 
 class WebFormFuzzer(GrammarFuzzer):
-    def __init__(self, url, **grammar_fuzzer_options):
+    """A Fuzzer for Web forms"""
+
+    def __init__(self, url: str, *,
+                 grammar_miner_class: Optional[type] = None,
+                 **grammar_fuzzer_options):
+        """Constructor.
+        `url` - the URL of the Web form to fuzz.
+        `grammar_miner_class` - the class of the grammar miner
+            to use (default: `HTMLGrammarMiner`)
+        Other keyword arguments are passed to the `GrammarFuzzer` constructor
+        """
+
+        if grammar_miner_class is None:
+            grammar_miner_class = HTMLGrammarMiner
+        self.grammar_miner_class = grammar_miner_class
+
+        # We first extract the HTML form and its grammar...
         html_text = self.get_html(url)
         grammar = self.get_grammar(html_text)
+
+        # ... and then initialize the `GrammarFuzzer` superclass with it
         super().__init__(grammar, **grammar_fuzzer_options)
 
-    def get_html(self, url):
+    def get_html(self, url: str):
+        """Retrieve the HTML text for the given URL `url`.
+        To be overloaded in subclasses."""
         return requests.get(url).text
 
-    def get_grammar(self, html_text):
-        grammar_miner = HTMLGrammarMiner(html_text)
-        return grammar_miner.mine_grammar()        
+    def get_grammar(self, html_text: str):
+        """Obtain the grammar for the given HTML `html_text`.
+        To be overloaded in subclasses."""
+        grammar_miner = self.grammar_miner_class(html_text)
+        return grammar_miner.mine_grammar()
 
 if __name__ == '__main__':
     web_form_fuzzer = WebFormFuzzer(httpd_url)
@@ -1022,6 +1100,8 @@ if __name__ == '__main__':
 
 
 class LinkHTMLParser(HTMLParser):
+    """Parse all links found in a HTML page"""
+
     def reset(self):
         super().reset()
         self.links = []
@@ -1033,11 +1113,20 @@ class LinkHTMLParser(HTMLParser):
             # print("Found:", tag, attributes)
             self.links.append(attributes["href"])
 
+### Excursion: Implementing a Crawler
+
+if __name__ == '__main__':
+    print('\n### Excursion: Implementing a Crawler')
+
+
+
 from collections import deque
 import urllib.robotparser
 
-def crawl(url, max_pages=1, same_host=True):
-    """Return the list of linked URLs from the given URL.  Accesses up to `max_pages`."""
+def crawl(url, max_pages: Union[int, float] = 1, same_host: bool = True):
+    """Return the list of linked URLs from the given URL.
+    `max_pages` - the maximum number of pages accessed.
+    `same_host` - if True (default), stay on the same host"""
 
     pages = deque([(url, "<param>")])
     urls_seen = set()
@@ -1074,6 +1163,7 @@ def crawl(url, max_pages=1, same_host=True):
                     target_url).hostname != urlsplit(url).hostname:
                 # Different host
                 continue
+
             if urlsplit(target_url).fragment != "":
                 # Ignore #fragments
                 continue
@@ -1086,6 +1176,13 @@ def crawl(url, max_pages=1, same_host=True):
         if page not in urls_seen:
             urls_seen.add(page)
             yield page
+
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
 
 if __name__ == '__main__':
     for url in crawl(httpd_url):
@@ -1122,7 +1219,7 @@ if __name__ == '__main__':
 
 from .Grammars import extend_grammar
 
-ORDER_GRAMMAR_WITH_HTML_INJECTION = extend_grammar(ORDER_GRAMMAR, {
+ORDER_GRAMMAR_WITH_HTML_INJECTION: Grammar = extend_grammar(ORDER_GRAMMAR, {
     "<name>": [cgi_encode('''
     Jane Doe<p>
     <strong><a href="www.lots.of.malware">Click here for cute cat pictures!</a></strong>
@@ -1148,7 +1245,7 @@ if __name__ == '__main__':
 
 
 
-ORDER_GRAMMAR_WITH_XSS_INJECTION = extend_grammar(ORDER_GRAMMAR, {
+ORDER_GRAMMAR_WITH_XSS_INJECTION: Grammar = extend_grammar(ORDER_GRAMMAR, {
     "<name>": [cgi_encode('Jane Doe' +
                           '<script>' +
                           'document.title = document.cookie.substring(0, 10);' +
@@ -1179,7 +1276,7 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    values = {
+    values: Dict[str, str] = {
         "item": "tshirt",
         "name": "Jane Doe",
         "email": "j.doe@example.com",
@@ -1242,14 +1339,21 @@ if __name__ == '__main__':
 
 
 class SQLInjectionGrammarMiner(HTMLGrammarMiner):
-    ATTACKS = [
+    """Demonstration of an automatic SQL Injection attack grammar miner"""
+
+    # Some common attack schemes
+    ATTACKS: List[str] = [
         "<string>' <sql-values>); <sql-payload>; <sql-comment>",
         "<string>' <sql-comment>",
         "' OR 1=1<sql-comment>'",
         "<number> OR 1=1",
     ]
 
-    def __init__(self, html_text, sql_payload):
+    def __init__(self, html_text: str, sql_payload: str):
+        """Constructor.
+        `html_text` - the HTML form to be attacked
+        `sql_payload` - the SQL command to be executed
+        """
         super().__init__(html_text)
 
         self.QUERY_GRAMMAR = extend_grammar(self.QUERY_GRAMMAR, {
@@ -1288,6 +1392,8 @@ if __name__ == '__main__':
                                   "/order?item=tshirt&name=Jane+Doe&email=doe%40example.com&city=Seattle&zip=98104"))
 
 def orders_db_is_empty():
+    """Return True if the orders database is empty (= we have been successful)"""
+
     try:
         entries = db.execute("SELECT * FROM orders").fetchall()
     except sqlite3.OperationalError:
@@ -1298,12 +1404,30 @@ if __name__ == '__main__':
     orders_db_is_empty()
 
 class SQLInjectionFuzzer(WebFormFuzzer):
-    def __init__(self, url, sql_payload="", **kwargs):
+    """Simple demonstrator of a SQL Injection Fuzzer"""
+
+    def __init__(self, url: str, sql_payload : str ="", *,
+                 sql_injection_grammar_miner_class: Optional[type] = None,
+                 **kwargs):
+        """Constructor.
+        `url` - the Web page (with a form) to retrieve
+        `sql_payload` - the SQL command to execute
+        `sql_injection_grammar_miner_class` - the miner to be used
+            (default: SQLInjectionGrammarMiner)
+        Other keyword arguments are passed to `WebFormFuzzer`.
+        """
         self.sql_payload = sql_payload
+
+        if sql_injection_grammar_miner_class is None:
+            sql_injection_grammar_miner_class = SQLInjectionGrammarMiner
+        self.sql_injection_grammar_miner_class = sql_injection_grammar_miner_class
+
         super().__init__(url, **kwargs)
 
     def get_grammar(self, html_text):
-        grammar_miner = SQLInjectionGrammarMiner(
+        """Obtain a grammar with SQL injection commands"""
+
+        grammar_miner = self.sql_injection_grammar_miner_class(
             html_text, sql_payload=self.sql_payload)
         return grammar_miner.mine_grammar()
 
@@ -1364,6 +1488,38 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     sql_fuzzer = SQLInjectionFuzzer(httpd_url, "DELETE FROM orders")
     sql_fuzzer.fuzz()
+
+from .ClassDiagram import display_class_hierarchy
+from .Fuzzer import Fuzzer, Runner
+from .Grammars import Grammar, Expansion
+from .GrammarFuzzer import GrammarFuzzer, DerivationTree
+
+if __name__ == '__main__':
+    display_class_hierarchy([WebFormFuzzer, SQLInjectionFuzzer, WebRunner,
+                             HTMLGrammarMiner, SQLInjectionGrammarMiner],
+                            public_methods=[
+                                Fuzzer.__init__,
+                                Fuzzer.fuzz,
+                                Fuzzer.run,
+                                Fuzzer.runs,
+                                Runner.__init__,
+                                Runner.run,
+                                WebRunner.__init__,
+                                WebRunner.run,
+                                GrammarFuzzer.__init__,
+                                GrammarFuzzer.fuzz,
+                                GrammarFuzzer.fuzz_tree,
+                                WebFormFuzzer.__init__,
+                                SQLInjectionFuzzer.__init__,
+                                HTMLGrammarMiner.__init__,
+                                SQLInjectionGrammarMiner.__init__,
+                            ],
+                            types={
+                                'DerivationTree': DerivationTree,
+                                'Expansion': Expansion,
+                                'Grammar': Grammar
+                            },
+                            project='fuzzingbook')
 
 ## Lessons Learned
 ## ---------------

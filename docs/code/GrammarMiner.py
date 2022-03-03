@@ -3,7 +3,7 @@
 
 # "Mining Input Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2021-06-04 14:56:57+02:00
+# Last change: 2022-02-13 15:52:58+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -54,33 +54,44 @@ We apply `recover_grammar()` on a `url_parse()` function that takes and decompos
 
 We extract the input grammar for `url_parse()` using `recover_grammar()`:
 
->>> grammar = recover_grammar(url_parse, URLS)
+>>> grammar = recover_grammar(url_parse, URLS, files=['urllib/parse.py'])
 >>> grammar
 {'': [''],
  '': [':'],
- '': ['', 'http', 'https'],
+ '': ['https', 'http'],
  '': ['///',
   '//'],
- '': ['user:pass@www.google.com:80',
-  'www.cispa.saarland:80',
-  'www.fuzzingbook.org'],
- '': ['/#',
-  '#'],
+ '': ['www.cispa.saarland:80',
+  'www.fuzzingbook.org',
+  'user:pass@www.google.com:80'],
+ '': ['#',
+  '/#'],
  '': ['/?'],
- '': ['q=path', ''],
- '': ['ref', 'News', '']}
+ '': ['q=path'],
+ '': ['News', 'ref']}
 
-The names of nonterminals are a bit technical; but the grammar nicely represents the structure of the input; for instance, the different schemes (`"http"`, `"https"`) are all identified.
+The names of nonterminals are a bit technical; but the grammar nicely represents the structure of the input; for instance, the different schemes (`"http"`, `"https"`) are all identified:
+
+>>> syntax_diagram(grammar)
+start
+urlsplit@437:url
+urlparse@394:scheme
+_splitnetloc@411:url
+urlparse@394:netloc
+urlsplit@481:url
+urlsplit@486:url
+urlparse@394:query
+urlparse@394:fragment
 The grammar can be immediately used for fuzzing, producing arbitrary combinations of input elements, which are all syntactically valid.
 
 >>> from GrammarCoverageFuzzer import GrammarCoverageFuzzer
 >>> fuzzer = GrammarCoverageFuzzer(grammar)
 >>> [fuzzer.fuzz() for i in range(5)]
-['http://user:pass@www.google.com:80/?q=path#News',
+['http://www.cispa.saarland:80/#ref',
  'https://www.fuzzingbook.org/',
- 'http://www.cispa.saarland:80/#ref',
- 'http://user:pass@www.google.com:80/#News',
- 'http://www.fuzzingbook.org/#News']
+ 'https://user:pass@www.google.com:80/?q=path#News',
+ 'http://www.fuzzingbook.org/?q=path#ref',
+ 'https://www.cispa.saarland:80/#News']
 
 Being able to automatically extract a grammar and to use this grammar for fuzzing makes for very effective test generation with a minimum of manual work.
 
@@ -104,6 +115,10 @@ if __name__ == '__main__':
 
 
 
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo("KsqwszWnAmM")
+
 ## Synopsis
 ## --------
 
@@ -124,6 +139,9 @@ if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
+
+from typing import List, Tuple, Callable, Any
+from collections.abc import Iterable
 
 from .Parser import process_inventory, process_vehicle, process_car, process_van, lr_graph  # minor dependency
 
@@ -339,48 +357,54 @@ if __name__ == '__main__':
 
 
 
-from .Grammars import START_SYMBOL, syntax_diagram, is_nonterminal
+from .Grammars import START_SYMBOL, syntax_diagram, \
+    is_nonterminal, Grammar
 
-from .GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string
-
-if __name__ == '__main__':
-    derivation_tree = (START_SYMBOL, [("1997,van,Ford,E350", [])])
-
-if __name__ == '__main__':
-    display_tree(derivation_tree)
+from .GrammarFuzzer import GrammarFuzzer, display_tree, \
+    DerivationTree
 
 if __name__ == '__main__':
-    derivation_tree = (START_SYMBOL, [('<vehicle>', [("1997,van,Ford,E350", [])],
-                                       [])])
+    derivation_tree: DerivationTree = (START_SYMBOL, [("1997,van,Ford,E350", [])])
 
 if __name__ == '__main__':
     display_tree(derivation_tree)
 
 if __name__ == '__main__':
-    derivation_tree = (START_SYMBOL, [('<vehicle>', [('<year>', [('1997', [])]),
-                                                     (",van,Ford,E350", [])], [])])
+    derivation_tree: DerivationTree = (START_SYMBOL, 
+                                       [('<vehicle>', [("1997,van,Ford,E350", [])],
+                                                       [])])
 
 if __name__ == '__main__':
     display_tree(derivation_tree)
 
 if __name__ == '__main__':
-    derivation_tree = (START_SYMBOL, [('<vehicle>', [('<year>', [('1997', [])]),
-                                                     (",van,", []),
-                                                     ('<company>', [('Ford', [])]),
-                                                     (",E350", [])], [])])
+    derivation_tree: DerivationTree = (START_SYMBOL, 
+                                       [('<vehicle>', [('<year>', [('1997', [])]),
+                                                       (",van,Ford,E350", [])], [])])
 
 if __name__ == '__main__':
     display_tree(derivation_tree)
 
 if __name__ == '__main__':
-    derivation_tree = (START_SYMBOL, [('<vehicle>', [('<year>', [('1997', [])]),
-                                                     (",", []),
-                                                     ("<kind>", [('van', [])]),
-                                                     (",", []),
-                                                     ('<company>', [('Ford', [])]),
-                                                     (",", []),
-                                                     ("<model>", [('E350', [])])
-                                                     ], [])])
+    derivation_tree: DerivationTree = (START_SYMBOL, 
+                                       [('<vehicle>', [('<year>', [('1997', [])]),
+                                                       (",van,", []),
+                                                       ('<company>', [('Ford', [])]),
+                                                       (",E350", [])], [])])
+
+if __name__ == '__main__':
+    display_tree(derivation_tree)
+
+if __name__ == '__main__':
+    derivation_tree: DerivationTree = (START_SYMBOL, 
+                                       [('<vehicle>', [('<year>', [('1997', [])]),
+                                                       (",", []),
+                                                       ("<kind>", [('van', [])]),
+                                                       (",", []),
+                                                       ('<company>', [('Ford', [])]),
+                                                       (",", []),
+                                                       ("<model>", [('E350', [])])
+                                                       ], [])])
 
 if __name__ == '__main__':
     display_tree(derivation_tree)
@@ -448,7 +472,7 @@ class TreeMiner(TreeMiner):
         return applied
 
 if __name__ == '__main__':
-    tree = (START_SYMBOL, [("1997,van,Ford,E350", [])])
+    tree: DerivationTree = (START_SYMBOL, [("1997,van,Ford,E350", [])])
     m = TreeMiner('', {}, log=True)
 
 if __name__ == '__main__':
@@ -584,12 +608,12 @@ class GrammarMiner(GrammarMiner):
         }
 
 if __name__ == '__main__':
-    inventory_grammar = GrammarMiner()
+    inventory_grammar_miner = GrammarMiner()
     for dt in csv_dt:
-        inventory_grammar.add_tree(dt)
+        inventory_grammar_miner.add_tree(dt)
 
 if __name__ == '__main__':
-    syntax_diagram(readable(inventory_grammar.grammar))
+    syntax_diagram(readable(inventory_grammar_miner.grammar))
 
 class GrammarMiner(GrammarMiner):
     def update_grammar(self, inputstr, trace):
@@ -604,12 +628,15 @@ class GrammarMiner(GrammarMiner):
     def create_tree_miner(self, *args):
         return TreeMiner(*args)
 
-def recover_grammar(fn, inputs, **kwargs):
+def recover_grammar(fn: Callable, inputs: Iterable[str], 
+                    **kwargs: Any) -> Grammar:
     miner = GrammarMiner()
+
     for inputstr in inputs:
         with Tracer(inputstr, **kwargs) as tracer:
             fn(tracer.my_input)
         miner.update_grammar(tracer.my_input, tracer.trace)
+
     return readable(miner.grammar)
 
 #### Example 1. Recovering the Inventory Grammar
@@ -638,7 +665,7 @@ URLS = [
     'http://www.fuzzingbook.org/#News',
 ]
 
-from urllib.parse import urlparse, clear_cache
+from urllib.parse import urlparse, clear_cache  # type: ignore
 
 def url_parse(url):
     clear_cache()
@@ -730,11 +757,9 @@ def C(cp_1):
     c_3 = c_2 + '@3'
     return c_3
 
-
 def B(bp_7):
     b_8 = bp_7 + '@8'
     return C(b_8)
-
 
 def A(ap_12):
     a_13 = ap_12 + '@13'
@@ -1051,18 +1076,16 @@ class AssignmentTracker(AssignmentTracker):
         }
         dispatch[event](arg, cxt, my_vars)
 
-def C(cp_1):
+def C(cp_1):  # type: ignore
     c_2 = cp_1
     c_3 = c_2
     return c_3
 
-
-def B(bp_7):
+def B(bp_7):  # type: ignore
     b_8 = bp_7
     return C(b_8)
 
-
-def A(ap_12):
+def A(ap_12):  # type: ignore
     a_13 = ap_12
     a_14 = B(a_13)
     a_14 = a_14
@@ -1530,8 +1553,8 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     su = ScopedGrammarMiner()
-    for url_dt in url_dts:
-        su.add_tree(url_dt)
+    for t in url_dts:
+        su.add_tree(t)
     syntax_diagram(readable(su.grammar))
 
 class ScopedGrammarMiner(ScopedGrammarMiner):
@@ -1598,7 +1621,7 @@ class ScopedGrammarMiner(ScopedGrammarMiner):
     def create_tree_miner(self, *args):
         return ScopeTreeMiner(*args)
 
-def recover_grammar(fn, inputs, **kwargs):
+def recover_grammar(fn, inputs, **kwargs):  # type: ignore
     miner = ScopedGrammarMiner()
     for inputstr in inputs:
         with Tracer(inputstr, **kwargs) as tracer:
@@ -1643,8 +1666,11 @@ if __name__ == '__main__':
     URLS
 
 if __name__ == '__main__':
-    grammar = recover_grammar(url_parse, URLS)
+    grammar = recover_grammar(url_parse, URLS, files=['urllib/parse.py'])
     grammar
+
+if __name__ == '__main__':
+    syntax_diagram(grammar)
 
 from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
 
@@ -1692,29 +1718,30 @@ if __name__ == '__main__':
 
 
 class Vehicle:
-    def __init__(self, vehicle):
+    def __init__(self, vehicle: str):
         year, kind, company, model, *_ = vehicle.split(',')
         self.year, self.kind, self.company, self.model = year, kind, company, model
 
-def process_inventory(inventory):
+def process_inventory_with_obj(inventory: str) -> str:
     res = []
     for vehicle in inventory.split('\n'):
         ret = process_vehicle(vehicle)
         res.extend(ret)
+
     return '\n'.join(res)
 
-def process_vehicle(vehicle):
+def process_vehicle_with_obj(vehicle: str) -> List[str]:
     v = Vehicle(vehicle)
     if v.kind == 'van':
-        return process_van(v)
+        return process_van_with_obj(v)
 
     elif v.kind == 'car':
-        return process_car(v)
+        return process_car_with_obj(v)
 
     else:
         raise Exception('Invalid entry')
 
-def process_van(vehicle):
+def process_van_with_obj(vehicle: Vehicle) -> List[str]:
     res = [
         "We have a %s %s van from %s vintage." % (vehicle.company,
                                                   vehicle.model, vehicle.year)
@@ -1726,7 +1753,7 @@ def process_van(vehicle):
         res.append("It is an old but reliable model!")
     return res
 
-def process_car(vehicle):
+def process_car_with_obj(vehicle: Vehicle) -> List[str]:
     res = [
         "We have a %s %s car from %s vintage." % (vehicle.company,
                                                   vehicle.model, vehicle.year)
@@ -1740,7 +1767,7 @@ def process_car(vehicle):
 
 if __name__ == '__main__':
     vehicle_grammar = recover_grammar(
-        process_inventory,
+        process_inventory_with_obj,
         [INVENTORY],
         methods=INVENTORY_METHODS)
 
@@ -1881,6 +1908,3 @@ if __name__ == '__main__':
     url_grammar = recover_grammar_with_taints(
         url_parse, URLS_X + ['ftp://user4:pass1@host4/?key4=value3'],
         methods=['urlsplit', 'urlparse', '_splitnetloc'])
-
-if __name__ == '__main__':
-    syntax_diagram(url_grammar)

@@ -3,7 +3,7 @@
 
 # "Mutation-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2021-06-02 17:41:57+02:00
+# Last change: 2022-02-21 09:11:19+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -48,15 +48,15 @@ This chapter introduces a `MutationFuzzer` class that takes a list of _seed inpu
 >>> mutation_fuzzer = MutationFuzzer(seed=[seed_input])
 >>> [mutation_fuzzer.fuzz() for i in range(10)]
 ['http://www.google.com/search?q=fuzzing',
- 'http://w}ww.google.com/search/q=fwzing',
- 'http://www.google.cAom/&szeaRch?q=fuzzing',
- 'htTp>//www.google.com/search?q=5zzing',
- 'http://www.goog.comm/search?q=ezzig',
- 'ht|p:o/www.google.com/searFch?q=fuzzing',
- '6http://www.goo^leco/sea\\rch?q=fbuzing',
- 'http://wv\x7f.g\x7fRoge.co(m@/qearch?q=fuyzzing',
- 'http://www.oogle/com/search?q=f6uzzing',
- 'http://ww.google.com/search?q9fuzzing']
+ 'http://wwBw.google.com/searh?q=fuzzing',
+ 'http8//wswgoRogle.am/secch?qU=fuzzing',
+ 'ittp://www.googLe.com/serch?q=fuzzingZ',
+ 'httP://wgw.google.com/seasch?Q=fuxzanmgY',
+ 'http://www.google.cxcom/search?q=fuzzing',
+ 'hFttp://ww.-g\x7fog+le.com/s%arch?q=f-uzz#ing',
+ 'http://www\x0egoogle.com/seaNrch?q=fuZzing',
+ 'http//www.Ygooge.comsarch?q=fuz~Ijg',
+ 'http8//ww.goog5le.com/sezarc?q=fuzzing']
 
 The `MutationCoverageFuzzer` maintains a _population_ of inputs, which are then evolved in order to maximize coverage.
 
@@ -64,11 +64,10 @@ The `MutationCoverageFuzzer` maintains a _population_ of inputs, which are then 
 >>> mutation_fuzzer.runs(http_runner, trials=10000)
 >>> mutation_fuzzer.population[:5]
 ['http://www.google.com/search?q=fuzzing',
- 'http://www.googl.com/search?q=fuzzig',
- 'http://www.googl.com/search\x7fs=fuzzig',
- 'Http://www.googl.com/seaxrch\x7fs=fuzzig',
- 'hTtp://ww.googl&comearch?q=fvuzigI']
-
+ 'http://wwv.oogle>co/search7Eq=fuzing',
+ 'http://wwv\x0eOogleb>co/seakh7Eq\x1d;fuzing',
+ 'http://wwv\x0eoglebkooqeakh7Eq\x1d;fuzing',
+ 'http://wwv\x0eoglekol=oekh7Eq\x1d\x1bf~ing']
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Mutation-Based Fuzzing"
@@ -88,6 +87,10 @@ if __name__ == '__main__':
     print('# Mutation-Based Fuzzing')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('9pQVjw-tE6w')
 
 ## Synopsis
 ## --------
@@ -118,19 +121,19 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
-if __name__ == '__main__':
-    try:
-        from urlparse import urlparse      # Python 2
-    except ImportError:
-        from urllib.parse import urlparse  # Python 3
+from typing import Tuple, List, Callable, Set, Any
 
+from urllib.parse import urlparse
+
+if __name__ == '__main__':
     urlparse("http://www.google.com/search?q=fuzzing")
 
-def http_program(url):
+def http_program(url: str) -> bool:
     supported_schemes = ["http", "https"]
     result = urlparse(url)
     if result.scheme not in supported_schemes:
-        raise ValueError("Scheme must be one of " + repr(supported_schemes))
+        raise ValueError("Scheme must be one of " + 
+                         repr(supported_schemes))
     if result.netloc == '':
         raise ValueError("Host must be non-empty")
 
@@ -200,7 +203,7 @@ if __name__ == '__main__':
 
 import random
 
-def delete_random_character(s):
+def delete_random_character(s: str) -> str:
     """Returns s with a random character deleted"""
     if s == "":
         return s
@@ -215,7 +218,7 @@ if __name__ == '__main__':
         x = delete_random_character(seed_input)
         print(repr(x))
 
-def insert_random_character(s):
+def insert_random_character(s: str) -> str:
     """Returns s with a random character inserted"""
     pos = random.randint(0, len(s))
     random_character = chr(random.randrange(32, 127))
@@ -238,12 +241,11 @@ def flip_random_character(s):
     # print("Flipping", bit, "in", repr(c) + ", giving", repr(new_c))
     return s[:pos] + new_c + s[pos + 1:]
 
-
 if __name__ == '__main__':
     for i in range(10):
         print(repr(flip_random_character(seed_input)))
 
-def mutate(s):
+def mutate(s: str) -> str:
     """Return s with a random mutation applied"""
     mutators = [
         delete_random_character,
@@ -266,7 +268,7 @@ if __name__ == '__main__':
 
 
 
-def is_valid_url(url):
+def is_valid_url(url: str) -> bool:
     try:
         result = http_program(url)
         return True
@@ -311,7 +313,6 @@ if __name__ == '__main__':
                     "seconds")
                 break
 
-
 ## Multiple Mutations
 ## ------------------
 
@@ -334,22 +335,34 @@ if __name__ == '__main__':
 from .Fuzzer import Fuzzer
 
 class MutationFuzzer(Fuzzer):
-    def __init__(self, seed, min_mutations=2, max_mutations=10):
+    """Base class for mutational fuzzing"""
+
+    def __init__(self, seed: List[str],
+                 min_mutations: int = 2,
+                 max_mutations: int = 10) -> None:
+        """Constructor.
+        `seed` - a list of (input) strings to mutate.
+        `min_mutations` - the minimum number of mutations to apply.
+        `max_mutations` - the maximum number of mutations to apply.
+        """
         self.seed = seed
         self.min_mutations = min_mutations
         self.max_mutations = max_mutations
         self.reset()
 
-    def reset(self):
+    def reset(self) -> None:
+        """Set population to initial seed.
+        To be overloaded in subclasses."""
         self.population = self.seed
         self.seed_index = 0
 
 class MutationFuzzer(MutationFuzzer):
-    def mutate(self, inp):
+    def mutate(self, inp: str) -> str:
         return mutate(inp)
 
 class MutationFuzzer(MutationFuzzer):
-    def create_candidate(self):
+    def create_candidate(self) -> str:
+        """Create a new candidate by mutating a population member"""
         candidate = random.choice(self.population)
         trials = random.randint(self.min_mutations, self.max_mutations)
         for i in range(trials):
@@ -357,7 +370,7 @@ class MutationFuzzer(MutationFuzzer):
         return candidate
 
 class MutationFuzzer(MutationFuzzer):
-    def fuzz(self):
+    def fuzz(self) -> str:
         if self.seed_index < len(self.seed):
             # Still seeding
             self.inp = self.seed[self.seed_index]
@@ -389,14 +402,14 @@ if __name__ == '__main__':
 from .Fuzzer import Runner
 
 class FunctionRunner(Runner):
-    def __init__(self, function):
+    def __init__(self, function: Callable) -> None:
         """Initialize.  `function` is a function to be executed"""
         self.function = function
 
-    def run_function(self, inp):
+    def run_function(self, inp: str) -> Any:
         return self.function(inp)
 
-    def run(self, inp):
+    def run(self, inp: str) -> Tuple[Any, str]:
         try:
             result = self.run_function(inp)
             outcome = self.PASS
@@ -410,10 +423,10 @@ if __name__ == '__main__':
     http_runner = FunctionRunner(http_program)
     http_runner.run("https://foo.bar/")
 
-from .Coverage import Coverage, population_coverage
+from .Coverage import Coverage, population_coverage, Location
 
 class FunctionCoverageRunner(FunctionRunner):
-    def run_function(self, inp):
+    def run_function(self, inp: str) -> Any:
         with Coverage() as cov:
             try:
                 result = super().run_function(inp)
@@ -424,7 +437,7 @@ class FunctionCoverageRunner(FunctionRunner):
         self._coverage = cov.coverage()
         return result
 
-    def coverage(self):
+    def coverage(self) -> Set[Location]:
         return self._coverage
 
 if __name__ == '__main__':
@@ -435,13 +448,15 @@ if __name__ == '__main__':
     print(list(http_runner.coverage())[:5])
 
 class MutationCoverageFuzzer(MutationFuzzer):
-    def reset(self):
+    """Fuzz with mutated inputs based on coverage"""
+
+    def reset(self) -> None:
         super().reset()
-        self.coverages_seen = set()
+        self.coverages_seen: Set[frozenset] = set()
         # Now empty; we fill this with seed in the first fuzz runs
         self.population = []
 
-    def run(self, runner):
+    def run(self, runner: FunctionCoverageRunner) -> Any:  # type: ignore
         """Run function(inp) while tracking coverage.
            If we reach new coverage,
            add inp to population and its coverage to population_coverage
@@ -466,7 +481,7 @@ if __name__ == '__main__':
         mutation_fuzzer.population, http_program)
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # type: ignore
 
 if __name__ == '__main__':
     plt.plot(cumulative_coverage)
@@ -491,6 +506,22 @@ if __name__ == '__main__':
     mutation_fuzzer = MutationCoverageFuzzer(seed=[seed_input])
     mutation_fuzzer.runs(http_runner, trials=10000)
     mutation_fuzzer.population[:5]
+
+from .ClassDiagram import display_class_hierarchy
+
+if __name__ == '__main__':
+    display_class_hierarchy(MutationCoverageFuzzer,
+                            public_methods=[
+                                Fuzzer.run,
+                                Fuzzer.__init__,
+                                Fuzzer.runs,
+                                Fuzzer.fuzz,
+                                MutationFuzzer.__init__,
+                                MutationFuzzer.fuzz,
+                                MutationCoverageFuzzer.run,
+                            ],
+                            types={'Location': Location},
+                            project='fuzzingbook')
 
 ## Lessons Learned
 ## ---------------

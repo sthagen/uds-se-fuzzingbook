@@ -311,7 +311,7 @@ ZIP_OPTIONS = -r
 # Default target is to build everything needed for publishing,
 # such that we can run "make -k" in a loop
 .PHONY: chapters web default
-web default: setup html code test-code test-imports test-packages slides
+web default: setup html code test-types test-code test-imports test-packages slides
 chapters: html
 
 # The book is recreated after any change to any source
@@ -419,16 +419,19 @@ else
 COMMIT_SYNOPSIS =
 endif
 
-# These notebooks can't be run under CI, so we simply copy them instead
+# These notebooks can't be run under CI, as they interact with Firefox
+# So we simply copy them instead
 ifeq ($(origin CI),environment)
 $(FULL_NOTEBOOKS)/Tracking.ipynb: $(NOTEBOOKS)/Tracking.ipynb
-	cp -pr $< $@
-# $(FULL_NOTEBOOKS)/ChangeCounter.ipynb: $(NOTEBOOKS)/ChangeCounter.ipynb
-# 	cp -pr $< $@
+	cp -r $< $@
+$(FULL_NOTEBOOKS)/GUIFuzzer.ipynb: $(NOTEBOOKS)/GUIFuzzer.ipynb
+	cp -r $< $@
+$(FULL_NOTEBOOKS)/FuzzingInTheLarge.ipynb: $(NOTEBOOKS)/FuzzingInTheLarge.ipynb
+	cp -r $< $@
 endif
 
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS)
-	$(EXECUTE_NOTEBOOK) $<
+	$(EXECUTE_NOTEBOOK) $< || $(EXECUTE_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $@
@@ -437,7 +440,7 @@ $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD
 $(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb \
 	$(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) \
 	$(NBSYNOPSIS) $(NBSHORTEN) $(SHARED)$(UTILS)/__init__.py
-	$(RENDER_NOTEBOOK) $<
+	$(RENDER_NOTEBOOK) $< || $(RENDER_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 	RENDER_HTML=1 $(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $@
@@ -450,7 +453,7 @@ $(FULL_NOTEBOOKS)/$(UTILS):
 $(FULL_NOTEBOOKS)/$(UTILS)/%: $(SHARED)$(UTILS)/%
 	@test -d $(FULL_NOTEBOOKS)/$(UTILS) || \
 		$(MKDIR) $(FULL_NOTEBOOKS)/$(UTILS)
-	cp -pr $< $@
+	cp -r $< $@
 
 
 
@@ -487,13 +490,16 @@ POST_TEX = utils/post_tex
 $(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(SHARED)$(ADD_METADATA) $(SHARED)$(POST_TEX)
 	$(eval TMPDIR := $(shell mktemp -d))
 	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) --titlepage $< > $(TMPDIR)/$(notdir $<)
-	cp -pr $(NOTEBOOKS)/PICS $(BIB) $(TMPDIR)
+	cp -r $(NOTEBOOKS)/PICS $(BIB) $(TMPDIR)
 	$(CONVERT_TO_TEX) $(TMPDIR)/$(notdir $<)
 	$(POST_TEX) $@ > $@~ && mv $@~ $@
 	@-$(RM) -fr $(TMPDIR)
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
+# The psot-html.py script
+POST_HTML ?= $(SHARED)utils/post_html.py
 
+# Its options
 POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--project="$(PROJECT)" \
 	--title="$(BOOKTITLE)" \
@@ -505,7 +511,7 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--todo-chapters="$(TODO_SOURCES)" \
 	--new-chapters="$(NEW_SOURCES)"
 
-HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) $(SHARED)utils/post_html.py \
+HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) $(POST_HTML) \
 	$(CHAPTERS_MAKEFILE) $(BIBCHECK)
 
 # Check bib
@@ -544,7 +550,7 @@ $(DOCS_TARGET)index.html: \
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)index.html $@
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
-	@$(PYTHON) $(SHARED)utils/post_html.py --menu-prefix=html/ --home $(POST_HTML_OPTIONS)$(HOME_POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(POST_HTML) --menu-prefix=html/ --home $(POST_HTML_OPTIONS)$(HOME_POST_HTML_OPTIONS) $@
 	@$(OPEN) $@
 
 # 404.html comes with absolute links (/html/) such that it works anywhare
@@ -555,7 +561,7 @@ $(DOCS_TARGET)404.html: $(FULL_NOTEBOOKS)/404.ipynb $(HTML_DEPS)
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)404.html $@
 	@cd $(HTML_TARGET) && $(RM) -r 404.nbpub.log 404_files
-	@$(PYTHON) $(SHARED)utils/post_html.py --menu-prefix=/html/ --home $(POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(POST_HTML) --menu-prefix=/html/ --home $(POST_HTML_OPTIONS) $@
 	(echo '---'; echo 'permalink: /404.html'; echo '---'; cat $@) > $@~ && mv $@~ $@
 	@$(OPEN) $@
 
@@ -565,7 +571,7 @@ $(DOCS_TARGET)html/00_Index.html: \
 	@cd $(HTML_TARGET) && $(RM) -r 00_Index.nbpub.log 00_Index_files
 	@cd $(DOCS_TARGET)html && $(RM) -r 00_Index.nbpub.log 00_Index_files
 	mv $(HTML_TARGET)00_Index.html $@
-	@$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(POST_HTML) $(POST_HTML_OPTIONS) $@
 
 $(DOCS_TARGET)html/00_Table_of_Contents.html: \
 	$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb \
@@ -574,14 +580,14 @@ $(DOCS_TARGET)html/00_Table_of_Contents.html: \
 	@cd $(HTML_TARGET) && $(RM) -r 00_Table_of_Contents.nbpub.log 00_Table_of_Contents_files
 	@cd $(DOCS_TARGET)html && $(RM) -r 00_Table_of_Contents.nbpub.log 00_Table_of_Contents_files
 	mv $(HTML_TARGET)00_Table_of_Contents.html $@
-	@$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(POST_HTML) $(POST_HTML_OPTIONS) $@
 	@$(OPEN) $@
 
 $(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(HTML_DEPS)
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	@$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(POST_HTML) $(POST_HTML_OPTIONS) $@
 	@if grep -i '\[unresolved citation' $@; then false; fi
 	@-test -L $(HTML_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(HTML_TARGET)
 	@$(OPEN) $@
@@ -623,9 +629,10 @@ endif
 # Reconstructing the reveal.js dir
 .PHONY: reveal.js
 $(REVEAL_JS) reveal.js: .FORCE
-	@-test -d "$@" || (cd $(SLIDES_TARGET); \
+	@-test -d "$(REVEAL_JS)" || (cd $(SLIDES_TARGET); \
 		git submodule add https://github.com/hakimel/reveal.js.git)
-	@git submodule update --remote
+	git submodule update --remote
+	-git commit -m "Update from source" $(REVEAL_JS)
 
 $(CODE_TARGET)setup.py: $(CODE_TARGET)setup.py.in
 	cat $< > $@
@@ -711,7 +718,7 @@ $(PDF_TARGET)$(BOOK).tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFI
 	cd $(PDF_TARGET) && $(RM) $(BOOK).nbpub.log
 	@echo Created $@
 
-$(HTML_TARGET)$(BOOK).html: $(FULLS) $(BIB) $(SHARED)utils/post_html.py
+$(HTML_TARGET)$(BOOK).html: $(FULLS) $(BIB) $(POST_HTML)
 	-$(RM) -r $(BOOK)
 	$(MKDIR) $(BOOK)
 	chapter=0; \
@@ -723,7 +730,7 @@ $(HTML_TARGET)$(BOOK).html: $(FULLS) $(BIB) $(SHARED)utils/post_html.py
 	ln -s ../$(BIB) $(BOOK)
 	$(CONVERT_TO_HTML) $(BOOK)
 	$(PYTHON) $(SHARED)utils/nbmerge.py $(BOOK)/Ch*.ipynb > notebooks/$(BOOK).ipynb
-	@$(PYTHON) $(SHARED)utils/post_html.py $(BETA_FLAG) $(POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(POST_HTML) $(BETA_FLAG) $(POST_HTML_OPTIONS) $@
 	$(RM) -r $(BOOK) notebooks/$(BOOK).ipynb
 	cd $(HTML_TARGET) && $(RM) $(BOOK).nbpub.log $(BOOK)_files/$(BIB)
 	@echo Created $@
@@ -801,11 +808,16 @@ $(CODE_TARGET).%.py.out:	$(CODE_TARGET)%.py
 		echo $(PY_SUCCESS_MAGIC) >> $@; \
 		exit 0; \
 	else \
-		echo "Error while running $<" >> $@; \
-		tail $@; \
-		touch -r $< $@; \
-		touch -A -010000 $@; \
-		exit 1; \
+	    echo Re-running $<...; \
+	    if $(PYTHON) $(PYTHON_WARNLEVEL) $< > $@ 2>&1; then \
+		    echo $(PY_SUCCESS_MAGIC) >> $@; \
+		    exit 0; \
+		else \
+			echo "Error while running $<" >> $@; \
+			tail $@; \
+			touch -r $< -A -010000 $@ 2> /dev/null || touch -r $< --date='-1 hour' $@; \
+			exit 1; \
+		fi; \
 	fi
 
 
@@ -813,12 +825,6 @@ $(CODE_TARGET).%.py.out:	$(CODE_TARGET)%.py
 $(CODE_TARGET).Tracking.py.out: $(CODE_TARGET)Tracking.py
 	@echo Skipping $<...
 	@echo $(PY_SUCCESS_MAGIC) > $@
-
-$(CODE_TARGET).FuzzingInTheLarge.py.out: $(CODE_TARGET)FuzzingInTheLarge.py
-	@echo Skipping $<...
-	@echo $(PY_SUCCESS_MAGIC) > $@
-
-
 
 
 .PHONY: test-code
@@ -915,7 +921,7 @@ check-types: test-types
 	fi
 
 .PHONY: run
-run: check-imports check-standard-imports check-package check-code
+run: check-types check-imports check-standard-imports check-package check-code
 
 # Todo checks
 check-todo todo:
@@ -991,13 +997,14 @@ publish-html-setup:
 	
 $(DOCS_TARGET)html/%: $(HTML_TARGET)%
 	$(RM) -r $@
-	cp -pr $< $@
+	cp -r $< $@
 
 # Add/update Python code on Web pages
 .PHONY: publish-code publish-code-setup
 publish-code: code publish-code-setup \
 	$(DOCS_TARGET)code/LICENSE.md \
 	$(DOCS_TARGET)code/README.md \
+	$(DOCS_TARGET)code/requirements.txt \
 	$(DOCS_TARGET)code/setup.py \
 	$(DOCS_TARGET)code/__init__.py \
 	$(UTILITY_FILES:%=$(DOCS_TARGET)code/$(UTILS)/%) \
@@ -1013,7 +1020,10 @@ publish-code-setup:
 		|| $(MKDIR) $(DOCS_TARGET)code/$(UTILS)
 	
 $(DOCS_TARGET)code/%: $(CODE_TARGET)%
-	cp -pr $< $@
+	cp -r $< $@
+
+$(DOCS_TARGET)code/requirements.txt: requirements.txt
+	cp -r $< $@
 
 .PHONY: dist publish-dist
 dist publish-dist: publish-code toc \
@@ -1021,34 +1031,21 @@ dist publish-dist: publish-code toc \
 	$(DOCS_TARGET)dist/$(PROJECT)-notebooks.zip
 
 DIST_CODE_FILES = \
-	$(DOCS_TARGET)code/README.md \
 	$(DOCS_TARGET)code/LICENSE.md \
+	$(DOCS_TARGET)code/README.md \
+	$(DOCS_TARGET)code/requirements.txt \
 	$(DOCS_TARGET)code/setup.py \
 	$(DOCS_TARGET)code/__init__.py
-	
-check-install:
-	$(eval TMPDIR := $(shell mktemp -d))
-	@cd $(TMPDIR); \
-	$(PYTHON) -c 'import $(PROJECT)' 2> /dev/null; \
-	if [ $$? = 0 ]; then \
-		echo "Error: Installed $(PROJECT) package conflicts with package creation" >&2; \
-		echo "Please uninstall it; e.g. with 'pip uninstall $(PROJECT)'." >&2; \
-		exit 1; \
-	else \
-		exit 0; \
-	fi
 
 clean-dist:
 	$(RM) -r code/__pycache__
+	-chmod +w code/$(UTILS) code/$(UTILS)/__pycache__
 	$(RM) -r code/$(UTILS)/__pycache__
-	$(RM) -r $(DOCS_TARGET)notebooks/$(PROJECT)/__pycache__
-	$(RM) -r $(DOCS_TARGET)notebooks/$(UTILS)/__pycache__
-	$(RM) -r $(DOCS_TARGET)code/$(UTILS)/__pycache__
-	$(RM) -r $(DOCS_TARGET)notebooks/.ipynb_checkpoints
+	-find $(DOCS_TARGET) -name __pycache__ -exec $(RM) -r {} \;
+	-find $(DOCS_TARGET) -name .ipynb_checkpoints -exec $(RM) -r {} \;
 
 $(DOCS_TARGET)dist/$(PROJECT)-code.zip: \
-	$(PYS) $(DIST_CODE_FILES) $(CHAPTERS_MAKEFILE) \
-	check-install clean-dist
+	$(PYS) $(DIST_CODE_FILES) $(CHAPTERS_MAKEFILE) clean-dist
 	@-mkdir $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)dist/*
 	$(RM) -r $(DOCS_TARGET)$(PROJECT)
@@ -1056,7 +1053,7 @@ $(DOCS_TARGET)dist/$(PROJECT)-code.zip: \
 	ln -s ../code $(DOCS_TARGET)$(PROJECT)/$(PROJECT)
 	mv $(DOCS_TARGET)$(PROJECT)/$(PROJECT)/setup.py $(DOCS_TARGET)$(PROJECT)
 	mv $(DOCS_TARGET)$(PROJECT)/$(PROJECT)/README.md $(DOCS_TARGET)$(PROJECT)
-	# ln -s ../../requirements.txt $(DOCS_TARGET)$(PROJECT)
+	mv $(DOCS_TARGET)$(PROJECT)/$(PROJECT)/requirements.txt $(DOCS_TARGET)$(PROJECT)
 	cd $(DOCS_TARGET)$(PROJECT); PYTHONPATH= $(PYTHON) ./setup.py sdist
 	mv $(DOCS_TARGET)$(PROJECT)/dist/* $(DOCS_TARGET)dist
 	# mv $(DOCS_TARGET)$(PROJECT)/*.egg-info $(DOCS_TARGET)dist
@@ -1073,11 +1070,11 @@ $(DOCS_TARGET)dist/$(PROJECT)-notebooks.zip: $(FULLS) $(CHAPTERS_MAKEFILE) \
 	cd $(DOCS_TARGET); ln -s notebooks $(PROJECT)-notebooks
 	cd $(DOCS_TARGET); \
 		$(ZIP) $(ZIP_OPTIONS) $(PROJECT)-notebooks.zip $(PROJECT)-notebooks
-	$(RM) $(DOCS_TARGET)/$(PROJECT)-notebooks
-	cd $(DOCS_TARGET); \
-		for file in $(EXTRAS); do \
-			$(ZIP) $(PROJECT)-notebooks.zip -d $(PROJECT)-notebooks/$$file; \
-		done
+	$(RM) $(DOCS_TARGET)$(PROJECT)-notebooks
+	for file in $(EXTRAS); do \
+		$(ZIP) $(DOCS_TARGET)$(PROJECT)-notebooks.zip -d $(PROJECT)-notebooks/$$file; \
+	done
+	# -$(ZIP) $(DOCS_TARGET)$(PROJECT)-notebooks.zip -d '$(PROJECT)-notebooks/data/*'
 	mv $(DOCS_TARGET)$(PROJECT)-notebooks.zip $@
 	@echo "Created notebook distribution files in $(DOCS_TARGET)dist"
 
@@ -1096,7 +1093,7 @@ publish-slides-setup:
 
 $(DOCS_TARGET)slides/%: $(SLIDES_TARGET)%
 	-rm -fr $@
-	cp -pr $< $@
+	cp -r $< $@
 
 
 # Add/update notebooks on Web pages
@@ -1106,6 +1103,7 @@ publish-notebooks: full-notebooks publish-notebooks-setup \
 	$(DOCS_TARGET)notebooks/$(BIB) \
 	$(DOCS_TARGET)notebooks/LICENSE.md \
 	$(DOCS_TARGET)notebooks/README.md \
+	$(DOCS_TARGET)notebooks/requirements.txt \
 	$(DOCS:%=$(DOCS_TARGET)notebooks/%.ipynb) \
 	$(UTILITY_FILES:%=$(DOCS_TARGET)notebooks/$(UTILS)/%)
 
@@ -1118,7 +1116,13 @@ publish-notebooks-setup:
 		|| $(MKDIR) $(DOCS_TARGET)notebooks/$(UTILS)
 
 $(DOCS_TARGET)notebooks/%: $(FULL_NOTEBOOKS)/%
-	cp -pr $< $@
+	cp -r $< $@
+
+$(DOCS_TARGET)notebooks/requirements.txt: requirements.txt
+	cp -r $< $@
+$(DOCS_TARGET)notebooks/LICENSE,md: LICENSE.md
+	cp -r $< $@
+
 
 .PHONY: publish-index
 publish-index: $(DOCS_TARGET)notebooks/00_Index.ipynb
@@ -1157,7 +1161,7 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: $(SHARED)utils/nbtoc.py \
 		
 # Index
 .PHONY: index
-index: $(DOCS_TARGET)notebooks/00_Index.ipynb $(DOCS_TARGET)/html/00_Index.html
+index: $(DOCS_TARGET)notebooks/00_Index.ipynb $(DOCS_TARGET)html/00_Index.html
 $(DOCS_TARGET)notebooks/00_Index.ipynb: $(SHARED)utils/nbindex.py \
 	$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%) \
 	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
@@ -1173,6 +1177,16 @@ update-synopsis synopsis:
 no-synopsis:
 	@echo Chapters without synopsis:
 	@grep -L '## Synopsis' $(ALL_CHAPTER_SOURCES) | grep -v '[0-9]'
+	
+
+# App icon
+appicon: $(NOTEBOOKS)/PICS/appicon.png
+$(NOTEBOOKS)/PICS/appicon.png: $(NOTEBOOKS)/PICS/Icon.png
+	-chmod +w $(SHARED)icon_gen
+	cp $(NOTEBOOKS)/PICS/Icon.png $(SHARED)icon_gen
+	(cd $(SHARED)icon_gen; $(PYTHON) icon_gen.py)
+	cp $(SHARED)icon_gen/out/Icon-114.png $@
+	$(RM) -r $(SHARED)icon_gen/out
 
 
 ## Python packages
@@ -1182,10 +1196,12 @@ no-synopsis:
 upload upload-dist: dist
 	@echo "Use your pypi.org password to upload"
 	cd $(DOCS_TARGET); twine upload dist/*.tar.gz
+	@echo "Use 'pip install $(PROJECT)' to install"
 
 upload-test: dist
 	@echo "Use your pypi.org password to upload"
 	cd $(DOCS_TARGET); twine upload --repository-url https://test.pypi.org/legacy/ dist/*.tar.gz
+	@echo "Use 'pip install --extra-index-url https://test.pypi.org/simple/ $(PROJECT)' to install"
 
 
 ## Binder services
@@ -1204,7 +1220,7 @@ binder: .FORCE
 SHARED_LEADER = debuggingbook
 SHARED_FOLLOWER = fuzzingbook
 .PHONY: shared
-shared:
+shared: clean-dist
 	@if [ -d ../$(SHARED_FOLLOWER) ]; then \
 		echo "Copying $(SHARED) from $(SHARED_LEADER) -> $(SHARED_FOLLOWER)"; \
 		chmod -R +w ../$(SHARED_FOLLOWER)/$(SHARED); \
@@ -1329,7 +1345,7 @@ NBDEPEND = $(SHARED)utils/nbdepend.py
 SITEMAP_OPTIONS = --graph --transitive-reduction --project $(PROJECT) # --cluster-by-parts
 
 sitemap: $(SITEMAP_SVG)
-	open $(SITEMAP_SVG)
+	-open $(SITEMAP_SVG)
 
 $(SITEMAP_SVG): $(CHAPTER_SOURCES) $(NBDEPEND)
 	$(PYTHON) $(NBDEPEND) $(SITEMAP_OPTIONS) $(CHAPTER_SOURCES) > $@~ && mv $@~ $@

@@ -3,7 +3,7 @@
 
 # "Carving Unit Tests" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2021-06-04 15:28:25+02:00
+# Last change: 2022-02-13 15:56:23+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -192,7 +192,7 @@ if __name__ == '__main__':
 
 import sys
 
-class Carver(object):
+class Carver:
     def __init__(self, log=False):
         self._log = log
         self.reset()
@@ -223,7 +223,9 @@ def get_qualified_name(code):
 def get_arguments(frame):
     """Return call arguments in the given frame"""
     # When called, all arguments are local variables
-    arguments = [(var, frame.f_locals[var]) for var in frame.f_locals]
+    local_variables = frame.f_locals.copy()
+    arguments = [(var, frame.f_locals[var])
+                 for var in local_variables]
     arguments.reverse()  # Want same order as call
     return arguments
 
@@ -352,7 +354,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     email_parse_call = simple_call_string(
-        "email.parser.parse",
+        "email.parser.Parser.parse",
         email_parse_argument_list[0])
     email_parse_call
 
@@ -363,10 +365,13 @@ if __name__ == '__main__':
 
 
 
-import pickle    
+import pickle
 
 if __name__ == '__main__':
-    parser_object = email_parse_argument_list[0][0][1]
+    email_parse_argument_list
+
+if __name__ == '__main__':
+    parser_object = email_parse_argument_list[0][2][1]
     parser_object
 
 if __name__ == '__main__':
@@ -399,8 +404,10 @@ def call_string(function_name, argument_list):
                    for (var, value) in argument_list]) + ")"
 
 if __name__ == '__main__':
-    call = call_string("email.parser.parse", email_parse_argument_list[0])
+    call = call_string("email.parser.Parser.parse", email_parse_argument_list[0])
     print(call)
+
+import email
 
 if __name__ == '__main__':
     eval(call)
@@ -479,9 +486,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     power_carver.arguments("power")
 
-from .Grammars import START_SYMBOL, is_valid_grammar, new_symbol, extend_grammar
+from .Grammars import START_SYMBOL, is_valid_grammar, new_symbol
+from .Grammars import extend_grammar, Grammar
 
-POWER_GRAMMAR = {
+POWER_GRAMMAR: Grammar = {
     "<start>": ["power(<x>, <y>)"],
     "<x>": ["1", "3"],
     "<y>": ["2", "4"]
@@ -502,7 +510,7 @@ if __name__ == '__main__':
 
 
 
-class CallGrammarMiner(object):
+class CallGrammarMiner:
     def __init__(self, carver, log=False):
         self.carver = carver
         self.log = log
