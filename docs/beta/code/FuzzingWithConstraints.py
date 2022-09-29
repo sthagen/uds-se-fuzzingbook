@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-08-09 11:12:24+02:00
+# Last change: 2022-09-26 19:24:19+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -72,35 +72,55 @@ Here, we instantiate the ISLa solver with a constraint stating that the area cod
 >>>             str.to.int() > 900
 >>>             """)
 
-With that, invoking `solver.solve()` produces an iterator over multiple solutions.
+With that, invoking `solver.solve()` returns a _solution_ for the constraints.
+
+>>> str(solver.solve())
+'(910)910-7342'
+
+`solve()` returns a derivation tree, which typically is converted into a string using `str()` as above. The `print()` function does this implicitly.
+
+Subsequent calls of `solve()` return more solutions:
 
 >>> for _ in range(10):
->>>     print(next(solver.solve()))
-(984)451-2706
-(903)831-0847
-(902)468-5290
-(904)348-3721
-(908)771-6402
-(980)281-2704
-(909)528-9146
-(912)643-6982
-(910)638-7014
-(901)896-7204
+>>>     print(solver.solve())
+(910)565-8296
+(910)440-0369
+(910)608-6457
+(910)700-3479
+(910)326-1972
+(910)814-1878
+(910)294-0408
+(910)705-1344
+(910)689-0159
+(904)209-7853
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
 
-The `solve()` method provides several additional parameters to configure the solver, as documented below
+The `ISLaSolver()` constructor provides several additional parameters to configure the solver, as documented below.
 Additional `ISLaSolver` methods allow to check inputs against constraints, and provide additional functionality.
+The ISLa functionality is also available on the command line:
 
->>> from ClassDiagram import display_class_hierarchy
->>> hierarchy = display_class_hierarchy([ISLaSolver],
->>>                        public_methods=[
->>>                             ISLaSolver.__init__,
->>>                             ISLaSolver.solve,
->>>                             ISLaSolver.evaluate,
->>>                         ])
->>> hierarchy
+>>> !isla --help
+usage: isla [-h] [-v] {solve,fuzz,check,parse,create} ...
+
+The ISLa command line interface.
+
+options:
+  -h, --help            show this help message and exit
+  -v, --version         Print the ISLa version number
+
+Commands:
+  {solve,fuzz,check,parse,create}
+    solve               create solutions to ISLa constraints or check their
+                        unsatisfiability
+    fuzz                pass solutions to an ISLa constraint to a test subject
+    check               check whether an input satisfies an ISLa constraint
+    parse               parse an input into a derivation tree if it satisfies
+                        an ISLa constraint
+    create              create grammar and constraint stubs
+
+
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Fuzzing with Constraints"
@@ -216,18 +236,49 @@ from isla.solver import ISLaSolver  # type: ignore
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 'str.len(<pagesize>) >= 6')
 
-import itertools
+if __name__ == '__main__':
+    str(solver.solve())
 
 if __name__ == '__main__':
-    solutions = itertools.islice(solver.solve(), 10)
-    for i, solution in enumerate(solutions):
-        print(i)
-        print(solution)   
+    for _ in range(10):
+        print(solver.solve())
+
+### Excursion: Derivation Trees
+
+if __name__ == '__main__':
+    print('\n### Excursion: Derivation Trees')
+
+
+
+if __name__ == '__main__':
+    solution = solver.solve()
+    solution
+
+from .Parser import EarleyParser  # minor dependency
+from .GrammarFuzzer import display_tree
+
+if __name__ == '__main__':
+    display_tree(solution)
+
+if __name__ == '__main__':
+    str(solution)
+
+if __name__ == '__main__':
+    print(solution)
+
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
 
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR,
                         'str.to.int(<pagesize>) >= 100000')
-    print(next(solver.solve()))
+
+if __name__ == '__main__':
+    print(solver.solve())
 
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
@@ -235,14 +286,14 @@ if __name__ == '__main__':
                     str.to.int(<pagesize>) >= 100 and 
                     str.to.int(<pagesize>) <= 200
                     ''')
-    print(next(solver.solve()))
+    print(solver.solve())
 
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                         '''
                     str.to.int(<pagesize>) mod 7 = 0
                     ''')
-    print(next(solver.solve()))
+    print(solver.solve())
 
 from .bookutils import quiz
 
@@ -262,7 +313,7 @@ if __name__ == '__main__':
                         '''
                     <pagesize> = <bufsize>
                     ''')
-    print(next(solver.solve()))
+    print(solver.solve())
 
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
@@ -270,7 +321,7 @@ if __name__ == '__main__':
                     str.to.int(<pagesize>) > 1024 and
                     str.to.int(<bufsize>) = str.to.int(<pagesize>) + 1
                     ''')
-    print(next(solver.solve()))
+    print(solver.solve())
 
 if __name__ == '__main__':
     quiz("Which constraints are necessary to "
@@ -297,7 +348,7 @@ if __name__ == '__main__':
                   (= (str.to.int <bufsize>)
                      (+ (str.to.int <pagesize>) 1)))
                 ''')
-    print(next(solver.solve()))
+    print(solver.solve())
 
 ### End of Excursion
 
@@ -305,6 +356,41 @@ if __name__ == '__main__':
     print('\n### End of Excursion')
 
 
+
+## ISLa on the Command Line
+## ------------------------
+
+if __name__ == '__main__':
+    print('\n## ISLa on the Command Line')
+
+
+
+if __name__ == '__main__':
+    with open('grammar.py', 'w') as f:
+        f.write('grammar = ')
+        f.write(str(CONFIG_GRAMMAR))
+
+from .bookutils import print_file
+
+if __name__ == '__main__':
+    print_file('grammar.py')
+
+if __name__ == '__main__':
+    import os
+    os.system(f'isla solve grammar.py')
+
+if __name__ == '__main__':
+    import os
+    os.system(f"isla solve grammar.py --constraint '<pagesize> = <bufsize>'")
+
+if __name__ == '__main__':
+    import os
+    os.system(f'isla solve grammar.py \\')
+    os.system(f"    --constraint '<pagesize> = <bufsize> and str.to.int(<pagesize>) > 10000'")
+
+if __name__ == '__main__':
+    import os
+    os.system(f'isla --help')
 
 ## Accessing Elements
 ## ------------------
@@ -319,20 +405,16 @@ if __name__ == '__main__':
                     '''
                 <pagesize>.<int> = <bufsize>.<int>
                 ''')
-    print(next(solver.solve()))
+    print(solver.solve())
 
 from .ExpectError import ExpectError
 
 if __name__ == '__main__':
-    with ExpectError():
-        solver = ISLaSolver(CONFIG_GRAMMAR, 
-                    '''
-                <config>..<digit> = "7"
-                ''')
-        print(next(solver.solve()))
-
-from .Parser import EarleyParser  # minor dependency
-from .GrammarFuzzer import display_tree
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            <config>..<digit> = "7" and <config>..<leaddigit> = "7"
+            ''')
+    print(solver.solve())
 
 if __name__ == '__main__':
     inp = 'pagesize=12\nbufsize=34'
@@ -348,9 +430,9 @@ LINES_OF_THREE_AS_OR_BS_GRAMMAR: Grammar = {
 
 if __name__ == '__main__':
     fuzzer = GrammarFuzzer(LINES_OF_THREE_AS_OR_BS_GRAMMAR)
-    for _ in range(5):
+    for i in range(5):
+        print(i)
         print(fuzzer.fuzz())
-        print()
 
 if __name__ == '__main__':
     solver = ISLaSolver(LINES_OF_THREE_AS_OR_BS_GRAMMAR, 
@@ -358,9 +440,9 @@ if __name__ == '__main__':
             <A>.<B>[2] = "b"
             ''')
 
-    for solution in itertools.islice(solver.solve(), 5):
-        print(solution)
-        print()
+    for i in range(5):
+        print(i)
+        print(solver.solve())
 
 ## Quantifiers
 ## -----------
@@ -377,20 +459,27 @@ if __name__ == '__main__':
                 str.to.int(i) > 1000
             ''')
 
-    for i, solution in enumerate(itertools.islice(solver.solve(), 10)):
-        print(i)
-        print(solution)
+    for _ in range(10):
+        print(solver.solve())
 
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                 '''
-            forall <int> i in <start>:
-                str.to.int(i) > 1000
+            exists <int> in <start>:
+                str.to.int(<int>) > 1000
             ''')
 
-    for i, solution in enumerate(itertools.islice(solver.solve(), 10)):
-        print(i)
-        print(solution)
+    print(solver.solve())
+
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            forall <int> in <start>:
+                str.to.int(<int>) > 1000
+            ''')
+
+    for _ in range(10):
+        print(solver.solve())
 
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
@@ -398,9 +487,8 @@ if __name__ == '__main__':
             str.to.int(<int>) > 1000
             ''')
 
-    for i, solution in enumerate(itertools.islice(solver.solve(), 10)):
-        print(i)
-        print(solution)
+    for _ in range(10):
+        print(solver.solve())
 
 ## Picking Expansions
 ## ------------------
@@ -413,22 +501,29 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                 '''
-            forall <int> i="<digit>" in <start>:
-                (i = "7")
+            forall <int>="<leaddigit><digits>" in <start>:
+                (<leaddigit> = "7")
             ''')
 
 if __name__ == '__main__':
-    print(next(solver.solve()))
+    str(solver.solve())
 
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                 '''
-            forall <int> i="<leaddigit><int>" in <start>:
-                (str.to.int(i) > 100)
+            forall <int> in <start>:
+                (str.to.int(<int>) > 100)
             ''')
 
+    str(solver.solve())
+
 if __name__ == '__main__':
-    print(next(solver.solve()))
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            str.to.int(<int>) > 100
+            ''')
+
+    str(solver.solve())
 
 ## Matching Expansion Elements
 ## ---------------------------
@@ -446,26 +541,36 @@ if __name__ == '__main__':
             ''')
 
 if __name__ == '__main__':
-    for i, solution in enumerate(itertools.islice(solver.solve(), 10)):
-        print(i)
-        print(solution)
+    for _ in range(10):
+        print(solver.solve())
+
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            forall <int>="<leaddigit><digits>" in <start>:
+                (<leaddigit> = "9")
+            ''')
+    print(solver.solve())
 
 if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, 
                 '''
             <int>.<leaddigit> = "9"
             ''')
+    print(solver.solve())
 
 if __name__ == '__main__':
-    for i, solution in enumerate(itertools.islice(solver.solve(), 10)):
-        print(i)
-        print(solution)
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            <leaddigit> = "9"
+            ''')
+    print(solver.solve())
 
-## Checking Inputs
-## ---------------
+## Checking Strings
+## ----------------
 
 if __name__ == '__main__':
-    print('\n## Checking Inputs')
+    print('\n## Checking Strings')
 
 
 
@@ -474,10 +579,10 @@ if __name__ == '__main__':
     solver = ISLaSolver(CONFIG_GRAMMAR, constraint)
 
 if __name__ == '__main__':
-    solver.evaluate('pagesize=12\nbufsize=34')
+    solver.check('pagesize=12\nbufsize=34')
 
 if __name__ == '__main__':
-    solver.evaluate('pagesize=27\nbufsize=27')
+    solver.check('pagesize=27\nbufsize=27')
 
 ## Case Studies
 ## ------------
@@ -520,8 +625,8 @@ if __name__ == '__main__':
             <xml-tree>.<open-tag>.<id> = <xml-tree>.<close-tag>.<id>
             ''', max_number_smt_instantiations=1)
 
-    for solution in itertools.islice(solver.solve(), 3):
-        print(solution)
+    for _ in range(3):
+        print(solver.solve())
 
 ### Excursion: Solver Configuration Parameters
 
@@ -536,8 +641,8 @@ if __name__ == '__main__':
             <xml-tree>.<open-tag>.<id> = <xml-tree>.<close-tag>.<id>
             ''', max_number_smt_instantiations=10)
 
-    for solution in itertools.islice(solver.solve(), 3):
-        print(solution)
+    for _ in range(3):
+        print(solver.solve())
 
 ### End of Excursion
 
@@ -554,8 +659,8 @@ if __name__ == '__main__':
             str.len(<id>) > 10
             ''', max_number_smt_instantiations=1)
 
-    for solution in itertools.islice(solver.solve(), 3):
-        print(solution)
+    for _ in range(3):
+        print(solver.solve())
 
 ### Definitions and Usages in Programming Languages
 
@@ -598,11 +703,13 @@ if __name__ == '__main__':
             forall <rhs> in <assgn>:
                 exists <assgn> declaration:
                     <rhs>.<var> = declaration.<lhs>.<var>
-            ''', max_number_smt_instantiations=1, max_number_free_instantiations=1)
+            ''',
+                max_number_smt_instantiations=1,
+                max_number_free_instantiations=1)
 
 if __name__ == '__main__':
-    for solution in itertools.islice(solver.solve(), 10):
-        print(solution)
+    for _ in range(10):
+        print(solver.solve())
 
 if __name__ == '__main__':
     solver = ISLaSolver(LANG_GRAMMAR, 
@@ -611,11 +718,13 @@ if __name__ == '__main__':
                 exists <assgn> declaration:
                     (before(declaration, <assgn>) and
                      <rhs>.<var> = declaration.<lhs>.<var>)
-            ''', max_number_free_instantiations=1, max_number_smt_instantiations=1)
+            ''',
+                max_number_free_instantiations=1,
+                max_number_smt_instantiations=1)
 
 if __name__ == '__main__':
-    for solution in itertools.islice(solver.solve(), 10):
-        print(solution)
+    for _ in range(10):
+        print(solver.solve())
 
 if __name__ == '__main__':
     solver = ISLaSolver(LANG_GRAMMAR, 
@@ -626,11 +735,13 @@ if __name__ == '__main__':
                      <rhs>.<var> = declaration.<lhs>.<var>)
             and
             count(start, "<assgn>", "5")
-            ''', max_number_smt_instantiations=1, max_number_free_instantiations=1)
+            ''', 
+                max_number_smt_instantiations=1,
+                max_number_free_instantiations=1)
 
 if __name__ == '__main__':
-    for solution in itertools.islice(solver.solve(), 10):
-        print(solution)
+    for _ in range(10):
+        print(solver.solve())
 
 ## Synopsis
 ## --------
@@ -651,17 +762,26 @@ if __name__ == '__main__':
             """)
 
 if __name__ == '__main__':
+    str(solver.solve())
+
+if __name__ == '__main__':
     for _ in range(10):
-        print(next(solver.solve()))
+        print(solver.solve())
 
 from .ClassDiagram import display_class_hierarchy
-hierarchy = display_class_hierarchy([ISLaSolver],
-                       public_methods=[
-                            ISLaSolver.__init__,
-                            ISLaSolver.solve,
-                            ISLaSolver.evaluate,
-                        ])
-hierarchy
+
+if __name__ == '__main__':
+    display_class_hierarchy([ISLaSolver],
+                             public_methods=[
+                                ISLaSolver.__init__,
+                                ISLaSolver.solve,
+                                ISLaSolver.check,
+                                ISLaSolver.parse,
+                            ])
+
+if __name__ == '__main__':
+    import os
+    os.system(f'isla --help')
 
 ## Lessons Learned
 ## ---------------
@@ -745,10 +865,16 @@ if __name__ == '__main__':
             ''')
 
 if __name__ == '__main__':
-    for solution in itertools.islice(solver.solve(), 10):
+    for _ in range(10):
+        solution = solver.solve()
         low_byte = solution.filter(lambda n: n.value == "<length>")[0][1]
         chars = solution.filter(lambda n: n.value == "<chars>")[0][1]
 
         print(f'Solution: "{solution}"', end=' ')
         print(f'(length: {ord(str(low_byte))}, len(chars): {len(str(chars))})')
         print()
+
+import os
+
+with ExpectError(FileNotFoundError, mute=True):
+    os.remove('grammar.py')

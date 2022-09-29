@@ -15619,19 +15619,62 @@ If we want to have inputs in which the page size has at least 6 digits, we can w
 </div></div></section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>The method <code>solve()</code> returns an iterator over all produced strings from the ISLa solver. To get these inputs, we can thus write</p>
+<p>The method <code>solve()</code> returns the next produced string from the ISLa solver, as a <em>derivation tree</em> (seen in the <a href="GrammarFuzzer.slides.html">Chapter on fuzzing with grammars</a>).
+To convert these into a string, we can use the <code>str()</code> converter:</p>
 
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">str</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[16]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>&#39;pagesize=804248\nbufsize=2&#39;</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div></div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>The <code>print()</code> method converts its arguments to strings implicityly.
+To get, say, the next 10 solutions, we can thus write</p>
+
+</div>
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solutions</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">10</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">solution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">solutions</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>   
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -15651,36 +15694,26 @@ If we want to have inputs in which the page size has at least 6 digits, we can w
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>0
-pagesize=800280
-bufsize=2
-1
-pagesize=800280
+<pre>pagesize=804248
 bufsize=7815304697428
-2
-pagesize=800280
+pagesize=804248
 bufsize=9
-3
-pagesize=800280
+pagesize=804248
 bufsize=314
-4
-pagesize=800280
+pagesize=804248
 bufsize=1
-5
-pagesize=800280
+pagesize=804248
 bufsize=435
-6
-pagesize=800280
+pagesize=804248
 bufsize=8
-7
-pagesize=800280
+pagesize=804248
 bufsize=5
-8
-pagesize=800280
+pagesize=804248
 bufsize=607
-9
-pagesize=800280
+pagesize=804248
 bufsize=49
+pagesize=802280
+bufsize=4383
 </pre>
 </div>
 </div>
@@ -15698,26 +15731,33 @@ bufsize=49
 </div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Note that repeated calls to <code>solver.solve()</code> in a loop would retrieve the first element of a <em>new</em> iterator object each time. This can result in less diverse inputs and degraded performance. Thus, we pick the number of desired elements using the <code>islice</code> function from <code>itertools</code> above.</p>
-
-</div>
-</div></div><div class="fragment">
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>To express a minimum numeric value, however, we can use a more elegant way.
+<p>To express a minimum numeric value, we can use a more elegant way.
 The function <code>str.to_int()</code>, for instance, converts a string into an integer.
 To obtain a page size that of at least 100000, we can thus also write</p>
 
 </div>
-</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span>
                     <span class="s1">&#39;str.to.int(&lt;pagesize&gt;) &gt;= 100000&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -15737,8 +15777,8 @@ To obtain a page size that of at least 100000, we can thus also write</p>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>pagesize=2922084
-bufsize=43
+<pre>pagesize=790002
+bufsize=68
 </pre>
 </div>
 </div>
@@ -15747,7 +15787,7 @@ bufsize=43
 
 </div>
 
-</div><div class="fragment">
+</div></div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p>If we want the page size to be in the range of 100 to 200, we can state this as a logical conjunction (using <code>and</code>)</p>
@@ -15756,7 +15796,7 @@ bufsize=43
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
@@ -15764,7 +15804,7 @@ bufsize=43
 <span class="sd">                    str.to.int(&lt;pagesize&gt;) &gt;= 100 and </span>
 <span class="sd">                    str.to.int(&lt;pagesize&gt;) &lt;= 200</span>
 <span class="sd">                    &#39;&#39;&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -15784,8 +15824,8 @@ bufsize=43
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>pagesize=109
-bufsize=4
+<pre>pagesize=106
+bufsize=54
 </pre>
 </div>
 </div>
@@ -15803,14 +15843,14 @@ bufsize=4
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[26]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
                     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">                    str.to.int(&lt;pagesize&gt;) mod 7 = 0</span>
 <span class="sd">                    &#39;&#39;&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -15830,8 +15870,8 @@ bufsize=4
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>pagesize=98
-bufsize=40
+<pre>pagesize=14
+bufsize=13
 </pre>
 </div>
 </div>
@@ -15843,7 +15883,7 @@ bufsize=40
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[28]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">quiz</span><span class="p">(</span><span class="s2">&quot;Which of the following constraints expresses &quot;</span>
@@ -15870,7 +15910,7 @@ bufsize=40
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[22]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[28]:</div>
 
 
 
@@ -15956,22 +15996,22 @@ bufsize=40
     <p>
     <div class="quiz_options" title="Check all that apply.">
     
-        <input type="checkbox" name="4fb8902a-17c3-11ed-ad4a-6298cf1a578f" id="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-1" onclick="clear_selection('4fb8902a-17c3-11ed-ad4a-6298cf1a578f')">
-        <label id="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-1-label" for="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-1"><code>&lt;pagesize&gt; is &lt;bufsize&gt;</code></label><br>
+        <input type="checkbox" name="ee579010-3dbf-11ed-b141-6298cf1a5790" id="ee579010-3dbf-11ed-b141-6298cf1a5790-1" onclick="clear_selection('ee579010-3dbf-11ed-b141-6298cf1a5790')">
+        <label id="ee579010-3dbf-11ed-b141-6298cf1a5790-1-label" for="ee579010-3dbf-11ed-b141-6298cf1a5790-1"><code>&lt;pagesize&gt; is &lt;bufsize&gt;</code></label><br>
     
-        <input type="checkbox" name="4fb8902a-17c3-11ed-ad4a-6298cf1a578f" id="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-2" onclick="clear_selection('4fb8902a-17c3-11ed-ad4a-6298cf1a578f')">
-        <label id="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-2-label" for="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-2"><code>str.to.int(&lt;pagesize&gt;) = str.to.int(&lt;bufsize&gt;)</code></label><br>
+        <input type="checkbox" name="ee579010-3dbf-11ed-b141-6298cf1a5790" id="ee579010-3dbf-11ed-b141-6298cf1a5790-2" onclick="clear_selection('ee579010-3dbf-11ed-b141-6298cf1a5790')">
+        <label id="ee579010-3dbf-11ed-b141-6298cf1a5790-2-label" for="ee579010-3dbf-11ed-b141-6298cf1a5790-2"><code>str.to.int(&lt;pagesize&gt;) = str.to.int(&lt;bufsize&gt;)</code></label><br>
     
-        <input type="checkbox" name="4fb8902a-17c3-11ed-ad4a-6298cf1a578f" id="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-3" onclick="clear_selection('4fb8902a-17c3-11ed-ad4a-6298cf1a578f')">
-        <label id="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-3-label" for="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-3"><code>&lt;pagesize&gt;) = &lt;bufsize&gt;</code></label><br>
+        <input type="checkbox" name="ee579010-3dbf-11ed-b141-6298cf1a5790" id="ee579010-3dbf-11ed-b141-6298cf1a5790-3" onclick="clear_selection('ee579010-3dbf-11ed-b141-6298cf1a5790')">
+        <label id="ee579010-3dbf-11ed-b141-6298cf1a5790-3-label" for="ee579010-3dbf-11ed-b141-6298cf1a5790-3"><code>&lt;pagesize&gt;) = &lt;bufsize&gt;</code></label><br>
     
-        <input type="checkbox" name="4fb8902a-17c3-11ed-ad4a-6298cf1a578f" id="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-4" onclick="clear_selection('4fb8902a-17c3-11ed-ad4a-6298cf1a578f')">
-        <label id="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-4-label" for="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-4"><code>atoi(&lt;pagesize&gt;) == atoi(&lt;bufsize&gt;)</code></label><br>
+        <input type="checkbox" name="ee579010-3dbf-11ed-b141-6298cf1a5790" id="ee579010-3dbf-11ed-b141-6298cf1a5790-4" onclick="clear_selection('ee579010-3dbf-11ed-b141-6298cf1a5790')">
+        <label id="ee579010-3dbf-11ed-b141-6298cf1a5790-4-label" for="ee579010-3dbf-11ed-b141-6298cf1a5790-4"><code>atoi(&lt;pagesize&gt;) == atoi(&lt;bufsize&gt;)</code></label><br>
     
     </div>
     </p>
-    <input id="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-submit" type="submit" value="Submit" onclick="check_selection('4fb8902a-17c3-11ed-ad4a-6298cf1a578f', 12, 1, '[4 ** 0.5, 9 ** 0.5]')">
-    <span class="quiz_hint" id="4fb8902a-17c3-11ed-ad4a-6298cf1a578f-hint"></span>
+    <input id="ee579010-3dbf-11ed-b141-6298cf1a5790-submit" type="submit" value="Submit" onclick="check_selection('ee579010-3dbf-11ed-b141-6298cf1a5790', 12, 1, '[4 ** 0.5, 9 ** 0.5]')">
+    <span class="quiz_hint" id="ee579010-3dbf-11ed-b141-6298cf1a5790-hint"></span>
     </div>
     
 </div>
@@ -15991,14 +16031,14 @@ bufsize=40
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[29]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
                     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">                    &lt;pagesize&gt; = &lt;bufsize&gt;</span>
 <span class="sd">                    &#39;&#39;&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -16037,7 +16077,7 @@ bufsize=8
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[30]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
@@ -16045,7 +16085,7 @@ bufsize=8
 <span class="sd">                    str.to.int(&lt;pagesize&gt;) &gt; 1024 and</span>
 <span class="sd">                    str.to.int(&lt;bufsize&gt;) = str.to.int(&lt;pagesize&gt;) + 1</span>
 <span class="sd">                    &#39;&#39;&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -16065,8 +16105,8 @@ bufsize=8
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>pagesize=4000
-bufsize=4001
+<pre>pagesize=4002
+bufsize=4003
 </pre>
 </div>
 </div>
@@ -16085,7 +16125,7 @@ The <a href="https://smtlib.cs.uiowa.edu/theories.shtml">list of all theories de
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[31]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">quiz</span><span class="p">(</span><span class="s2">&quot;Which constraints are necessary to &quot;</span>
@@ -16111,7 +16151,7 @@ The <a href="https://smtlib.cs.uiowa.edu/theories.shtml">list of all theories de
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[25]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[31]:</div>
 
 
 
@@ -16197,26 +16237,273 @@ The <a href="https://smtlib.cs.uiowa.edu/theories.shtml">list of all theories de
     <p>
     <div class="quiz_options" title="Check all that apply.">
     
-        <input type="checkbox" name="5229f696-17c3-11ed-ad4a-6298cf1a578f" id="5229f696-17c3-11ed-ad4a-6298cf1a578f-1" onclick="clear_selection('5229f696-17c3-11ed-ad4a-6298cf1a578f')">
-        <label id="5229f696-17c3-11ed-ad4a-6298cf1a578f-1-label" for="5229f696-17c3-11ed-ad4a-6298cf1a578f-1"><code>str.to.int(&lt;digit&gt;) &gt;= 1</code></label><br>
+        <input type="checkbox" name="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790" id="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-1" onclick="clear_selection('f0b2ca5a-3dbf-11ed-b141-6298cf1a5790')">
+        <label id="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-1-label" for="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-1"><code>str.to.int(&lt;digit&gt;) &gt;= 1</code></label><br>
     
-        <input type="checkbox" name="5229f696-17c3-11ed-ad4a-6298cf1a578f" id="5229f696-17c3-11ed-ad4a-6298cf1a578f-2" onclick="clear_selection('5229f696-17c3-11ed-ad4a-6298cf1a578f')">
-        <label id="5229f696-17c3-11ed-ad4a-6298cf1a578f-2-label" for="5229f696-17c3-11ed-ad4a-6298cf1a578f-2"><code>str.to.int(&lt;digit&gt;) &lt;= 3</code></label><br>
+        <input type="checkbox" name="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790" id="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-2" onclick="clear_selection('f0b2ca5a-3dbf-11ed-b141-6298cf1a5790')">
+        <label id="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-2-label" for="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-2"><code>str.to.int(&lt;digit&gt;) &lt;= 3</code></label><br>
     
-        <input type="checkbox" name="5229f696-17c3-11ed-ad4a-6298cf1a578f" id="5229f696-17c3-11ed-ad4a-6298cf1a578f-3" onclick="clear_selection('5229f696-17c3-11ed-ad4a-6298cf1a578f')">
-        <label id="5229f696-17c3-11ed-ad4a-6298cf1a578f-3-label" for="5229f696-17c3-11ed-ad4a-6298cf1a578f-3"><code>str.to.int(&lt;leaddigit&gt;) &gt;= 1</code></label><br>
+        <input type="checkbox" name="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790" id="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-3" onclick="clear_selection('f0b2ca5a-3dbf-11ed-b141-6298cf1a5790')">
+        <label id="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-3-label" for="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-3"><code>str.to.int(&lt;leaddigit&gt;) &gt;= 1</code></label><br>
     
-        <input type="checkbox" name="5229f696-17c3-11ed-ad4a-6298cf1a578f" id="5229f696-17c3-11ed-ad4a-6298cf1a578f-4" onclick="clear_selection('5229f696-17c3-11ed-ad4a-6298cf1a578f')">
-        <label id="5229f696-17c3-11ed-ad4a-6298cf1a578f-4-label" for="5229f696-17c3-11ed-ad4a-6298cf1a578f-4"><code>str.to.int(&lt;leaddigit&gt;) &lt;= 3</code></label><br>
+        <input type="checkbox" name="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790" id="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-4" onclick="clear_selection('f0b2ca5a-3dbf-11ed-b141-6298cf1a5790')">
+        <label id="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-4-label" for="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-4"><code>str.to.int(&lt;leaddigit&gt;) &lt;= 3</code></label><br>
     
     </div>
     </p>
-    <input id="5229f696-17c3-11ed-ad4a-6298cf1a578f-submit" type="submit" value="Submit" onclick="check_selection('5229f696-17c3-11ed-ad4a-6298cf1a578f', 22, 1, '[1 ** 0, 4 ** 0.5, 16 ** 0.5]')">
-    <span class="quiz_hint" id="5229f696-17c3-11ed-ad4a-6298cf1a578f-hint"></span>
+    <input id="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-submit" type="submit" value="Submit" onclick="check_selection('f0b2ca5a-3dbf-11ed-b141-6298cf1a5790', 22, 1, '[1 ** 0, 4 ** 0.5, 16 ** 0.5]')">
+    <span class="quiz_hint" id="f0b2ca5a-3dbf-11ed-b141-6298cf1a5790-hint"></span>
     </div>
     
 </div>
 
+</div>
+
+</div>
+
+</div>
+
+</div></section></section><section><section>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="ISLa-on-the-Command-Line">ISLa on the Command Line<a class="anchor-link" href="#ISLa-on-the-Command-Line">&#182;</a></h2>
+</div>
+</div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>When you install <code>isla-solver</code>, you also get an <code>isla</code> command-line tool.
+This allows you to create inputs from the command line or shell scripts.</p>
+
+</div>
+</div></div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Let us first create a <em>grammar file</em> suitable for <code>isla</code>. <code>isla</code> accepts grammars in Fuzzingbook format; they need to define a variable named <code>grammar</code>.</p>
+
+</div>
+</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[33]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;grammar.py&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;grammar = &#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">))</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[35]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_file</span><span class="p">(</span><span class="s1">&#39;grammar.py&#39;</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>grammar = {<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;start&gt;</span><span class="ansi-yellow-fg">&#39;</span>: [<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;config&gt;</span><span class="ansi-yellow-fg">&#39;</span>], <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;config&gt;</span><span class="ansi-yellow-fg">&#39;</span>: [<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">pagesize=&lt;pagesize&gt;</span><span class="ansi-yellow-fg">\n</span><span class="ansi-yellow-fg">bufsize=&lt;bufsize&gt;</span><span class="ansi-yellow-fg">&#39;</span>], <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;pagesize&gt;</span><span class="ansi-yellow-fg">&#39;</span>: [<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;int&gt;</span><span class="ansi-yellow-fg">&#39;</span>], <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;bufsize&gt;</span><span class="ansi-yellow-fg">&#39;</span>: [<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;int&gt;</span><span class="ansi-yellow-fg">&#39;</span>], <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;int&gt;</span><span class="ansi-yellow-fg">&#39;</span>: [<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;leaddigit&gt;&lt;digits&gt;</span><span class="ansi-yellow-fg">&#39;</span>], <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;digits&gt;</span><span class="ansi-yellow-fg">&#39;</span>: [<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;digit&gt;&lt;digits&gt;</span><span class="ansi-yellow-fg">&#39;</span>], <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;digit&gt;</span><span class="ansi-yellow-fg">&#39;</span>: [<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">0</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">1</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">2</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">3</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">4</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">5</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">6</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">7</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">8</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">9</span><span class="ansi-yellow-fg">&#39;</span>], <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">&lt;leaddigit&gt;</span><span class="ansi-yellow-fg">&#39;</span>: [<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">1</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">2</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">3</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">4</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">5</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">6</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">7</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">8</span><span class="ansi-yellow-fg">&#39;</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">9</span><span class="ansi-yellow-fg">&#39;</span>]}</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div></div></section><section>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>With this, we can use <code>isla</code> as a grammar fuzzer, plain and simple
+By default, <code>isla solve</code> produces one single matching output:</p>
+
+</div>
+</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[36]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>isla solve grammar.py
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>pagesize=926415839008
+bufsize=47
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div></div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>The true power of <code>isla</code>, however, comes to be as we (again) add <em>constraints</em> to be solved - either in separate <em>constraint files</em> or (easier) directly on the command line:</p>
+
+</div>
+</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[37]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>isla solve grammar.py --constraint <span class="s1">&#39;&lt;pagesize&gt; = &lt;bufsize&gt;&#39;</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>pagesize=8
+bufsize=8
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[38]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>isla solve grammar.py <span class="err">\</span>
+    <span class="o">--</span><span class="n">constraint</span> <span class="s1">&#39;&lt;pagesize&gt; = &lt;bufsize&gt; and str.to.int(&lt;pagesize&gt;) &gt; 10000&#39;</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>pagesize=29824208
+bufsize=29824208
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>The <code>isla</code> executable provides several options and commands, and is a great alternative on the command line.</p>
+
+</div>
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[39]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>isla --help
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>usage: isla [-h] [-v] {solve,fuzz,check,parse,create} ...
+
+The ISLa command line interface.
+
+options:
+  -h, --help            show this help message and exit
+  -v, --version         Print the ISLa version number
+
+Commands:
+  {solve,fuzz,check,parse,create}
+    solve               create solutions to ISLa constraints or check their
+                        unsatisfiability
+    fuzz                pass solutions to an ISLa constraint to a test subject
+    check               check whether an input satisfies an ISLa constraint
+    parse               parse an input into a derivation tree if it satisfies
+                        an ISLa constraint
+    create              create grammar and constraint stubs
+</pre>
+</div>
 </div>
 
 </div>
@@ -16255,14 +16542,14 @@ Here is an example using the dot operator:</p>
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[27]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[40]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
                 <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">                &lt;pagesize&gt;.&lt;int&gt; = &lt;bufsize&gt;.&lt;int&gt;</span>
 <span class="sd">                &#39;&#39;&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -16299,18 +16586,17 @@ bufsize=8
 Here is an example using the double dot operator, enforcing <em>every</em> digit in a <code>&lt;config&gt;</code> element to be <code>7</code>:</p>
 
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[29]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[42]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
-    <span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
-                <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">                &lt;config&gt;..&lt;digit&gt; = &quot;7&quot;</span>
-<span class="sd">                &#39;&#39;&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            &lt;config&gt;..&lt;digit&gt; = &quot;7&quot; and &lt;config&gt;..&lt;leaddigit&gt; = &quot;7&quot;</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -16329,25 +16615,9 @@ Here is an example using the double dot operator, enforcing <em>every</em> digit
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_24754/2177507368.py&#34;, line 2, in &lt;module&gt;
-    solver = ISLaSolver(CONFIG_GRAMMAR,
-  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/solver.py&#34;, line 253, in __init__
-    formula = parse_isla(formula, grammar, structural_predicates, semantic_predicates)
-  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/language.py&#34;, line 2708, in parse_isla
-    antlr4.ParseTreeWalker().walk(isla_emitter, parser.start())
-  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/antlr4/tree/Tree.py&#34;, line 161, in walk
-    self.exitRule(listener, t)
-  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/antlr4/tree/Tree.py&#34;, line 188, in exitRule
-    ctx.exitRule(listener)
-  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/isla_language/IslaLanguageParser.py&#34;, line 205, in exitRule
-    listener.exitStart(self)
-  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/language.py&#34;, line 2411, in exitStart
-    self.close_over_xpath_expressions(
-  File &#34;/Users/zeller/.pyenv/versions/3.10.2/lib/python3.10/site-packages/isla/language.py&#34;, line 2286, in close_over_xpath_expressions
-    assert all(len(xpath_segments) == 1 for xpath_segments, _ in group), &#39;The .. axis is not yet supported&#39;
-AssertionError: The .. axis is not yet supported (expected)
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>pagesize=7
+bufsize=7
 </pre>
 </div>
 </div>
@@ -16356,7 +16626,7 @@ AssertionError: The .. axis is not yet supported (expected)
 
 </div>
 
-</div></section><section>
+</div></div></section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p>To reason about dots and double dots, it helps visualizing the string in question as a <em>derivation tree</em> discussed in the <a href="GrammarFuzzer.slides.html">chapter on grammar-based fuzzing</a>.
@@ -16367,26 +16637,10 @@ bufsize=34</code></pre>
 <p>for instance, looks like this:</p>
 
 </div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[30]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># ignore</span>
-<span class="kn">from</span> <span class="nn">Parser</span> <span class="kn">import</span> <span class="n">EarleyParser</span>  <span class="c1"># minor dependency</span>
-<span class="kn">from</span> <span class="nn">GrammarFuzzer</span> <span class="kn">import</span> <span class="n">display_tree</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[31]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[43]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># ignore</span>
@@ -16409,7 +16663,7 @@ bufsize=34</code></pre>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[31]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[43]:</div>
 
 
 
@@ -16666,7 +16920,7 @@ In contrast, <code>&lt;config&gt;..&lt;digit&gt;</code> refers to <em>all</em> <
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[32]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[44]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">LINES_OF_THREE_AS_OR_BS_GRAMMAR</span><span class="p">:</span> <span class="n">Grammar</span> <span class="o">=</span> <span class="p">{</span>
@@ -16684,13 +16938,13 @@ In contrast, <code>&lt;config&gt;..&lt;digit&gt;</code> refers to <em>all</em> <
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[33]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[45]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzer</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">LINES_OF_THREE_AS_OR_BS_GRAMMAR</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
-    <span class="nb">print</span><span class="p">()</span>
 </pre></div>
 
      </div>
@@ -16710,25 +16964,21 @@ In contrast, <code>&lt;config&gt;..&lt;digit&gt;</code> refers to <em>all</em> <
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>aba
-baa
-aba
-aba
+<pre>0
+abb
 bba
-
-bab
-
-bbb
-bbb
-
-bab
-aba
-
+baa
+1
 aab
-aaa
+abb
+aab
+2
 bbb
-aba
-
+3
+bba
+aab
+4
+abb
 </pre>
 </div>
 </div>
@@ -16746,7 +16996,7 @@ aba
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[34]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[46]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">LINES_OF_THREE_AS_OR_BS_GRAMMAR</span><span class="p">,</span> 
@@ -16754,9 +17004,9 @@ aba
 <span class="sd">            &lt;A&gt;.&lt;B&gt;[2] = &quot;b&quot;</span>
 <span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">solution</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">5</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -16776,21 +17026,16 @@ aba
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>abb
-aba
-
-bbb
-aba
-
-bbb
-bbb
-
+<pre>0
 bba
-bba
-
+1
 abb
-bba
-
+2
+bbb
+3
+abb
+4
+bbb
 </pre>
 </div>
 </div>
@@ -16833,7 +17078,7 @@ So we write</p>
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[35]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[47]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
@@ -16842,9 +17087,8 @@ So we write</p>
 <span class="sd">                str.to.int(i) &gt; 1000</span>
 <span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">solution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">10</span><span class="p">)):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -16864,36 +17108,26 @@ So we write</p>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>0
-pagesize=2022
-bufsize=8
-1
-pagesize=2022
-bufsize=77682409531
-2
-pagesize=2022
-bufsize=5993
-3
-pagesize=2022
-bufsize=40
-4
-pagesize=2022
-bufsize=6
-5
-pagesize=2022
-bufsize=91
-6
-pagesize=2022
-bufsize=137
-7
-pagesize=2022
-bufsize=239121
-8
-pagesize=2022
-bufsize=3
-9
-pagesize=2022
-bufsize=6
+<pre>pagesize=5
+bufsize=4042
+pagesize=370591324816
+bufsize=4042
+pagesize=9
+bufsize=4042
+pagesize=88
+bufsize=4042
+pagesize=2
+bufsize=4042
+pagesize=7
+bufsize=4042
+pagesize=165
+bufsize=4042
+pagesize=6
+bufsize=4042
+pagesize=4
+bufsize=4042
+pagesize=5
+bufsize=4042
 </pre>
 </div>
 </div>
@@ -16911,25 +17145,23 @@ bufsize=6
 </div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Besides existential quantification, there also is <em>universal</em> quantification, using the <code>forall</code> keyword instead of <code>exists</code>.
-If we want <em>all</em> elements in some context to satisfy a constraint, this comes in handy.</p>
+<p>Specifying a variable name is optional; if you omit it, you can use the quantified nonterminal instead.
+The above constraint can thus also be expressed in a more compact fashion:</p>
 
 </div>
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[36]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[48]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
             <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">            forall &lt;int&gt; i in &lt;start&gt;:</span>
-<span class="sd">                str.to.int(i) &gt; 1000</span>
+<span class="sd">            exists &lt;int&gt; in &lt;start&gt;:</span>
+<span class="sd">                str.to.int(&lt;int&gt;) &gt; 1000</span>
 <span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">solution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">10</span><span class="p">)):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -16949,36 +17181,76 @@ If we want <em>all</em> elements in some context to satisfy a constraint, this c
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>0
-pagesize=1042
-bufsize=2242
-1
-pagesize=8040
-bufsize=2242
-2
-pagesize=4004
-bufsize=2242
-3
-pagesize=2022
-bufsize=2242
-4
+<pre>pagesize=4
+bufsize=2003
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Besides existential quantification, there also is <em>universal</em> quantification, using the <code>forall</code> keyword instead of <code>exists</code>.
+If we want <em>all</em> elements in some context to satisfy a constraint, this comes in handy.</p>
+
+</div>
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[49]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            forall &lt;int&gt; in &lt;start&gt;:</span>
+<span class="sd">                str.to.int(&lt;int&gt;) &gt; 1000</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>pagesize=2082
+bufsize=2022
+pagesize=8004
+bufsize=2022
+pagesize=8005
+bufsize=2022
+pagesize=2008
+bufsize=2022
+pagesize=8002
+bufsize=2022
+pagesize=1004
+bufsize=2022
+pagesize=2004
+bufsize=2022
+pagesize=8000
+bufsize=2022
 pagesize=8008
-bufsize=2242
-5
-pagesize=2822
-bufsize=2242
-6
-pagesize=2080
-bufsize=2242
-7
-pagesize=4022
-bufsize=2242
-8
-pagesize=2002
-bufsize=2242
-9
-pagesize=1008
-bufsize=2242
+bufsize=2022
+pagesize=8044
+bufsize=2022
 </pre>
 </div>
 </div>
@@ -17002,7 +17274,7 @@ bufsize=2242
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[37]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[50]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
@@ -17010,9 +17282,8 @@ bufsize=2242
 <span class="sd">            str.to.int(&lt;int&gt;) &gt; 1000</span>
 <span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">solution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">10</span><span class="p">)):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -17032,36 +17303,26 @@ bufsize=2242
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>0
-pagesize=2002
-bufsize=2008
-1
-pagesize=2024
-bufsize=2008
-2
-pagesize=7140
-bufsize=2008
-3
+<pre>pagesize=4028
+bufsize=1002
+pagesize=2000
+bufsize=1002
 pagesize=1002
-bufsize=2008
-4
-pagesize=1102
-bufsize=2008
-5
-pagesize=8002
-bufsize=2008
-6
-pagesize=4004
-bufsize=2008
-7
-pagesize=8024
-bufsize=2008
-8
-pagesize=4002
-bufsize=2008
-9
-pagesize=2004
-bufsize=2008
+bufsize=1002
+pagesize=2040
+bufsize=1002
+pagesize=2084
+bufsize=1002
+pagesize=4022
+bufsize=1002
+pagesize=1008
+bufsize=1002
+pagesize=2044
+bufsize=1002
+pagesize=2002
+bufsize=1002
+pagesize=2008
+bufsize=1002
 </pre>
 </div>
 </div>
@@ -17093,30 +17354,22 @@ The form</p>
 (Again, we can replace <code>forall</code> with <code>exists</code>, and make this an existential quantification rather than a universal quantification.)</p>
 
 </div>
-</div></div></section><section>
+</div></div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>In our grammar, we have two possible expansions for <code>&lt;int&gt;</code>, namely <code>&lt;digit&gt;</code> (for values 0..9) and <code>&lt;leaddigit&gt;&lt;int&gt;</code> (for 10 and above):</p>
-
-<pre><code>&lt;int&gt; ::= &lt;digit&gt; | &lt;leaddigit&gt;&lt;int&gt;</code></pre>
+<p>Here's an example of using <code>forall</code>:</p>
 
 </div>
-</div><div class="fragment">
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>If we now want to constrain only <em>one</em> of the two alternatives, we can use the following expression:</p>
-
-</div>
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[38]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[51]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
             <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">            forall &lt;int&gt; i=&quot;&lt;digit&gt;&quot; in &lt;start&gt;:</span>
-<span class="sd">                (i = &quot;7&quot;)</span>
+<span class="sd">            forall &lt;int&gt;=&quot;&lt;leaddigit&gt;&lt;digits&gt;&quot; in &lt;start&gt;:</span>
+<span class="sd">                (&lt;leaddigit&gt; = &quot;7&quot;)</span>
 <span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
 </pre></div>
 
@@ -17125,20 +17378,20 @@ The form</p>
 </div>
 </div>
 
-</div></div></section><section>
+</div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>This ensures that <em>if</em> <code>&lt;int&gt;</code> is expanded to a single digit, this single digit becomes <code>7</code>.
-The effect is that all <code>&lt;int&gt;</code> values now end in a <code>7</code> digit:</p>
+<p>This ensures that when <code>&lt;int&gt;</code> is expanded to a lead digit followed by more digits, the lead digit becomes <code>7</code>.
+The effect is that all <code>&lt;int&gt;</code> values now start with a <code>7</code> digit:</p>
 
 </div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[39]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[52]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">str</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -17154,14 +17407,15 @@ The effect is that all <code>&lt;int&gt;</code> values now end in a <code>7</cod
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[52]:</div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>pagesize=90
-bufsize=18542163937
-</pre>
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>&#39;pagesize=7\nbufsize=750128463976&#39;</pre>
 </div>
+
 </div>
 
 </div>
@@ -17171,40 +17425,22 @@ bufsize=18542163937
 </div></div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Likewise, we can constrain <code>i</code> to the second expansion alternative, and thus ensure that all multi-digit numbers are greater than 100:</p>
+<p>Likewise, we can constrain <code>&lt;int&gt;</code> as a whole, and thus ensure that all numbers are greater than 100:</p>
 
 </div>
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[40]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[53]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
             <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">            forall &lt;int&gt; i=&quot;&lt;leaddigit&gt;&lt;int&gt;&quot; in &lt;start&gt;:</span>
-<span class="sd">                (str.to.int(i) &gt; 100)</span>
+<span class="sd">            forall &lt;int&gt; in &lt;start&gt;:</span>
+<span class="sd">                (str.to.int(&lt;int&gt;) &gt; 100)</span>
 <span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
-</pre></div>
 
-     </div>
-</div>
-</div>
-</div>
-
-</div></div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Here, however, the solver can also choose the less constrained alternative for <code>&lt;int&gt;</code>s, picking single digits:</p>
-
-</div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[41]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+<span class="nb">str</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -17220,21 +17456,70 @@ bufsize=18542163937
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[53]:</div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>pagesize=7
-bufsize=46428357011920
-</pre>
-</div>
-</div>
 
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>&#39;pagesize=108\nbufsize=104&#39;</pre>
 </div>
 
 </div>
 
-</div></div></section></section><section><section>
+</div>
+
+</div>
+
+</div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>By default, all variables are universally quantified in <code>&lt;start&gt;</code>, so the above can also be expressed as</p>
+
+</div>
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[54]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            str.to.int(&lt;int&gt;) &gt; 100</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+
+<span class="nb">str</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[54]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>&#39;pagesize=2044\nbufsize=1924&#39;</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div></section></section><section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h2 id="Matching-Expansion-Elements">Matching Expansion Elements<a class="anchor-link" href="#Matching-Expansion-Elements">&#182;</a></h2>
@@ -17256,7 +17541,7 @@ Using the special brace form, we make <code>lead</code> a variable holding the v
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[42]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[55]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
@@ -17280,12 +17565,11 @@ Using the special brace form, we make <code>lead</code> a variable holding the v
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[43]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[56]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">solution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">10</span><span class="p">)):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -17305,36 +17589,26 @@ Using the special brace form, we make <code>lead</code> a variable holding the v
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>0
-pagesize=93
-bufsize=9467801592
-1
+<pre>pagesize=91
+bufsize=935974280667360
+pagesize=95
+bufsize=91
 pagesize=9
-bufsize=916
-2
-pagesize=98
+bufsize=978197
+pagesize=9
 bufsize=9
-3
+pagesize=9
+bufsize=9144
+pagesize=99
+bufsize=9
+pagesize=9
+bufsize=9157
+pagesize=9
+bufsize=9
 pagesize=9
 bufsize=98
-4
-pagesize=98
-bufsize=9
-5
 pagesize=9
-bufsize=9
-6
-pagesize=9
-bufsize=979
-7
-pagesize=906
-bufsize=9
-8
-pagesize=9739
-bufsize=90
-9
-pagesize=9
-bufsize=93
+bufsize=9498
 </pre>
 </div>
 </div>
@@ -17346,41 +17620,67 @@ bufsize=93
 </div></section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Could we express the above in a simpler fashion? Of course! Using implicit universal quantification and the dot notation introduced earlier, we could write, for instance</p>
+<p>Could we express the above in a simpler fashion? Yes! For one, we can refer to <code>&lt;leaddigit&gt;</code> directly rather than introducing variables like <code>i</code> and <code>lead</code>:</p>
 
 </div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[44]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[57]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            forall &lt;int&gt;=&quot;&lt;leaddigit&gt;&lt;digits&gt;&quot; in &lt;start&gt;:</span>
+<span class="sd">                (&lt;leaddigit&gt; = &quot;9&quot;)</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>pagesize=95
+bufsize=9786934210
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div></div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Furthermore, using implicit universal quantification and the dot notation introduced earlier, we could write, for instance</p>
+
+</div>
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[58]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
             <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">            &lt;int&gt;.&lt;leaddigit&gt; = &quot;9&quot;</span>
 <span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>and obtain the same result (not necessarily the exact same values, though, due to randomness):</p>
-
-</div>
-</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[45]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">solution</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">10</span><span class="p">)):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -17400,36 +17700,8 @@ bufsize=93
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>0
-pagesize=92
-bufsize=9973685014
-1
-pagesize=9482
-bufsize=98
-2
-pagesize=91
-bufsize=9
-3
-pagesize=90
-bufsize=9
-4
-pagesize=9
-bufsize=9753
-5
-pagesize=990
-bufsize=9
-6
-pagesize=9
-bufsize=9
-7
-pagesize=9
-bufsize=9
-8
-pagesize=90
-bufsize=9
-9
-pagesize=973
-bufsize=99
+<pre>pagesize=9
+bufsize=996031847257405
 </pre>
 </div>
 </div>
@@ -17438,28 +17710,86 @@ bufsize=99
 
 </div>
 
-</div></section><section>
+</div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>But while the dot notation is sufficient for many cases, the pattern matching notation is more general and more flexible – even if it is harder to read.</p>
+<p>or just</p>
 
 </div>
-</div></section></section><section><section>
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[59]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">CONFIG_GRAMMAR</span><span class="p">,</span> 
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            &lt;leaddigit&gt; = &quot;9&quot;</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>pagesize=9
+bufsize=9813765904237
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Checking-Inputs">Checking Inputs<a class="anchor-link" href="#Checking-Inputs">&#182;</a></h2>
+<p>and obtain the same result (not necessarily the exact same values, though, due to randomness):</p>
+
+</div>
+</div></div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>But while universal quantification and dot notation are sufficient for many cases, the pattern matching notation is more general and more flexible – even if it may be harder to read.</p>
+
+</div>
+</div></div></section></section><section><section>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Checking-Strings">Checking Strings<a class="anchor-link" href="#Checking-Strings">&#182;</a></h2>
 </div>
 </div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Using an <code>ISLaSolver</code>, we can also check if an input satisfies the constraints.
-Let us check if in a given input, <code>&lt;pagesize&gt;</code> and <code>&lt;bufsize&gt;</code> are the same.</p>
+<p>Using an <code>ISLaSolver</code>, we can also check if an string satisfies the constraints.
+This can be applied to inputs, but also to <em>outputs</em>; ISLa constraints can thus server as <em>oracles</em> – that is, <em>predicates</em> that check a test result.</p>
+
+</div>
+</div></div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Let us check if in a given string, <code>&lt;pagesize&gt;</code> and <code>&lt;bufsize&gt;</code> are the same.</p>
 
 </div>
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[46]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[60]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">constraint</span> <span class="o">=</span> <span class="s1">&#39;&lt;pagesize&gt; = &lt;bufsize&gt;&#39;</span>
@@ -17480,10 +17810,10 @@ Let us check if in a given input, <code>&lt;pagesize&gt;</code> and <code>&lt;bu
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[47]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[61]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s1">&#39;pagesize=12</span><span class="se">\n</span><span class="s1">bufsize=34&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s1">&#39;pagesize=12</span><span class="se">\n</span><span class="s1">bufsize=34&#39;</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -17499,13 +17829,56 @@ Let us check if in a given input, <code>&lt;pagesize&gt;</code> and <code>&lt;bu
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[47]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[61]:</div>
 
 
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>ThreeValuedTruth(0)</pre>
+<pre>False</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div></div></section><section>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>If we repeat the above, however, with an input that satisfies the constraint, we obtain a <code>True</code> result.</p>
+
+</div>
+</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[62]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="s1">&#39;pagesize=27</span><span class="se">\n</span><span class="s1">bufsize=27&#39;</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[62]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>True</pre>
 </div>
 
 </div>
@@ -17517,47 +17890,10 @@ Let us check if in a given input, <code>&lt;pagesize&gt;</code> and <code>&lt;bu
 </div></div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>If we repeat the above, however, with an input that satisfies the constraint, we obtain a <code>true</code> result.</p>
+<p>Checking constraints is much more efficient than solving them, as ISLa does not have to search for possible solutions.</p>
 
 </div>
-</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[48]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s1">&#39;pagesize=27</span><span class="se">\n</span><span class="s1">bufsize=27&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[48]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>ThreeValuedTruth(1)</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></section></section><section><section>
+</div></div></section></section><section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h2 id="Case-Studies">Case Studies<a class="anchor-link" href="#Case-Studies">&#182;</a></h2><p>Let us further illustrate ISLa using a few case studies.</p>
@@ -17578,7 +17914,7 @@ The problem is not so much expressing the <em>syntax</em> of XML – the basics
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[49]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[63]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">XML_GRAMMAR</span><span class="p">:</span> <span class="n">Grammar</span> <span class="o">=</span> <span class="p">{</span>
@@ -17600,7 +17936,7 @@ The problem is not so much expressing the <em>syntax</em> of XML – the basics
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[50]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[64]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">)</span>
@@ -17614,7 +17950,7 @@ The problem is not so much expressing the <em>syntax</em> of XML – the basics
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[51]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[65]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># ignore</span>
@@ -18103,7 +18439,7 @@ The problem is not so much expressing the <em>syntax</em> of XML – the basics
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[52]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[66]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzer</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">)</span>
@@ -18123,13 +18459,13 @@ The problem is not so much expressing the <em>syntax</em> of XML – the basics
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[52]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[66]:</div>
 
 
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>&#39;&lt;r&gt;Text&lt;/q&gt;&#39;</pre>
+<pre>&#39;&lt;p&gt;Text&lt;/b&gt;&#39;</pre>
 </div>
 
 </div>
@@ -18155,7 +18491,7 @@ All we need is the rule that constrains the <code>&lt;xml-tree&gt;</code>:</p>
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[53]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[67]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">,</span> 
@@ -18163,8 +18499,8 @@ All we need is the rule that constrains the <code>&lt;xml-tree&gt;</code>:</p>
 <span class="sd">            &lt;xml-tree&gt;.&lt;open-tag&gt;.&lt;id&gt; = &lt;xml-tree&gt;.&lt;close-tag&gt;.&lt;id&gt;</span>
 <span class="sd">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="n">max_number_smt_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">solution</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">3</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -18211,7 +18547,7 @@ Plus, of course, we can easily add more constraints:</p>
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[55]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[69]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">,</span> 
@@ -18221,8 +18557,8 @@ Plus, of course, we can easily add more constraints:</p>
 <span class="sd">            str.len(&lt;id&gt;) &gt; 10</span>
 <span class="sd">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="n">max_number_smt_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">solution</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">3</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -18242,9 +18578,9 @@ Plus, of course, we can easily add more constraints:</p>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>&lt;hpkhsklfbhp&gt;Text&lt;/hpkhsklfbhp&gt;
-&lt;ppkhuclnblk&gt;&lt;ppkhuclnblk&gt;Text&lt;/ppkhuclnblk&gt;&lt;/ppkhuclnblk&gt;
-&lt;ppnxkklnahk&gt;&lt;ppnxkklnahk&gt;&lt;ppnxkklnahk&gt;Text&lt;/ppnxkklnahk&gt;&lt;/ppnxkklnahk&gt;&lt;/ppnxkklnahk&gt;
+<pre>&lt;ppkxuclkalk&gt;Text&lt;/ppkxuclkalk&gt;
+&lt;ppkxuclkalk&gt;&lt;ppnpsclmrln&gt;Text&lt;/ppnpsclmrln&gt;&lt;/ppkxuclkalk&gt;
+&lt;ppkxuclkalk&gt;&lt;ppnpsclmrln&gt;&lt;ppnxuklcbpp&gt;Text&lt;/ppnxuklcbpp&gt;&lt;/ppnpsclmrln&gt;&lt;/ppkxuclkalk&gt;
 </pre>
 </div>
 </div>
@@ -18269,7 +18605,7 @@ Variable names consist of a single lowercase letter; values can only be digits; 
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[56]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[70]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">LANG_GRAMMAR</span><span class="p">:</span> <span class="n">Grammar</span> <span class="o">=</span> <span class="p">{</span>
@@ -18296,7 +18632,7 @@ Variable names consist of a single lowercase letter; values can only be digits; 
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[57]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[71]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">)</span>
@@ -18310,7 +18646,7 @@ Variable names consist of a single lowercase letter; values can only be digits; 
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[58]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[72]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">syntax_diagram</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">)</span>
@@ -18818,7 +19154,7 @@ Variable names consist of a single lowercase letter; values can only be digits; 
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[59]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[73]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzer</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">)</span>
@@ -18832,7 +19168,7 @@ Variable names consist of a single lowercase letter; values can only be digits; 
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[60]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[74]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
@@ -18856,16 +19192,16 @@ Variable names consist of a single lowercase letter; values can only be digits; 
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>r := 6
-z := 4
-h := 3
-g := a
-y := 9; u := m
-k := d
-c := q
-o := n; l := p; g := 2; l := 0
-s := 5; h := v
-x := d; e := a; p := 2
+<pre>f := a
+j := 8
+v := 6; h := 2; g := 7
+m := n; v := o; j := 3; p := 8
+x := 0; i := e; u := p
+b := l
+e := 7; k := 7; u := d; a := e; m := d; a := 9; m := u
+q := r; l := d; w := x
+e := i
+e := m; r := 1
 </pre>
 </div>
 </div>
@@ -18892,7 +19228,7 @@ In ISLa, we achive this thorugh the following constraint:</p>
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[61]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[75]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">,</span> 
@@ -18900,7 +19236,9 @@ In ISLa, we achive this thorugh the following constraint:</p>
 <span class="sd">            forall &lt;rhs&gt; in &lt;assgn&gt;:</span>
 <span class="sd">                exists &lt;assgn&gt; declaration:</span>
 <span class="sd">                    &lt;rhs&gt;.&lt;var&gt; = declaration.&lt;lhs&gt;.&lt;var&gt;</span>
-<span class="sd">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="n">max_number_smt_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_number_free_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">,</span>
+            <span class="n">max_number_smt_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">max_number_free_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -18911,11 +19249,11 @@ In ISLa, we achive this thorugh the following constraint:</p>
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[62]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[76]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">solution</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">10</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -18935,16 +19273,16 @@ In ISLa, we achive this thorugh the following constraint:</p>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>c := 6
+<pre>d := 5
 p := p
-u := u
-b := b
-y := 5; w := 6
-b := 2; z := b
-v := 1; o := v
-s := 7; k := s
-p := p; h := 0
-j := j; f := 4
+h := 7; b := h
+h := 3; h := 0; v := h
+h := h; h := 1; a := h
+h := h; w := h
+h := 8; h := 2; f := h
+h := 6; h := h; e := h
+p := 4; q := p
+p := 9; n := p
 </pre>
 </div>
 </div>
@@ -18970,7 +19308,7 @@ With <code>before()</code>, we can rewrite our constraint as</p>
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[63]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[77]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">,</span> 
@@ -18979,7 +19317,9 @@ With <code>before()</code>, we can rewrite our constraint as</p>
 <span class="sd">                exists &lt;assgn&gt; declaration:</span>
 <span class="sd">                    (before(declaration, &lt;assgn&gt;) and</span>
 <span class="sd">                     &lt;rhs&gt;.&lt;var&gt; = declaration.&lt;lhs&gt;.&lt;var&gt;)</span>
-<span class="sd">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="n">max_number_free_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_number_smt_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">,</span>
+            <span class="n">max_number_free_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">max_number_smt_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -18996,11 +19336,11 @@ With <code>before()</code>, we can rewrite our constraint as</p>
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[64]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[78]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">solution</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">10</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -19020,16 +19360,16 @@ With <code>before()</code>, we can rewrite our constraint as</p>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>e := 5
-d := 1; e := 2
-h := 1; e := h
-c := 2; m := c
-d := 1; r := d
-a := 5; u := a
-p := 5; r := p
-p := 9; q := p
-p := 4; x := p; m := 0
-p := 0; p := 2; r := p
+<pre>q := 2
+h := 7; h := h
+h := 5; h := 0; o := h
+h := 4; h := h; c := h
+h := 3; h := 1; p := h
+p := 6; m := p
+p := 8; d := p
+p := 9; p := 9; n := p
+p := 5; p := p; t := p
+p := 2; p := 4; x := p
 </pre>
 </div>
 </div>
@@ -19046,10 +19386,10 @@ p := 0; p := 2; r := p
 To have statements with exactly 5 assignments, write</p>
 
 </div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[65]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[79]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">LANG_GRAMMAR</span><span class="p">,</span> 
@@ -19060,7 +19400,9 @@ To have statements with exactly 5 assignments, write</p>
 <span class="sd">                     &lt;rhs&gt;.&lt;var&gt; = declaration.&lt;lhs&gt;.&lt;var&gt;)</span>
 <span class="sd">            and</span>
 <span class="sd">            count(start, &quot;&lt;assgn&gt;&quot;, &quot;5&quot;)</span>
-<span class="sd">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="n">max_number_smt_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_number_free_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="sd">            &#39;&#39;&#39;</span><span class="p">,</span> 
+            <span class="n">max_number_smt_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">max_number_free_instantiations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -19068,14 +19410,14 @@ To have statements with exactly 5 assignments, write</p>
 </div>
 </div>
 
-</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[66]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[80]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">solution</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(),</span> <span class="mi">10</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -19095,16 +19437,16 @@ To have statements with exactly 5 assignments, write</p>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>u := 4; w := 9; h := 6; f := 8; q := 7
-d := 8; p := 2; o := 5; r := 7; t := d
-a := 2; b := 6; o := 0; y := 7; h := a
-f := 2; b := 9; f := 4; p := 5; y := f
-p := 4; w := 1; v := 7; g := p; i := 8
-j := 9; y := 2; g := 4; p := j; d := 5
-u := 9; p := 8; y := 4; a := u; z := 3
-d := 8; t := 6; e := 7; y := d; c := d
-b := 0; y := 9; s := 1; n := b; k := b
-d := 9; e := 3; n := 6; i := d; v := d
+<pre>h := 0; e := h; d := 7; h := 5; n := 4
+p := 8; m := p; t := 3; s := 6; j := p
+p := 1; x := p; z := 2; i := p; l := 9
+p := 2; k := p; o := 8; y := p; c := p
+d := 3; u := d; w := d; q := 8; g := 2
+p := 2; r := p; v := p; b := 6; a := p
+h := 1; f := h; o := h; v := h; e := 4
+a := 1; b := a; r := a; k := a; j := a
+b := 9; l := 7; d := b; s := 1; r := 5
+p := 6; m := 8; k := p; i := 2; w := p
 </pre>
 </div>
 </div>
@@ -19165,7 +19507,7 @@ Common functions include</p>
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[69]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[83]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">solver</span> <span class="o">=</span> <span class="n">ISLaSolver</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">,</span> 
@@ -19182,17 +19524,66 @@ Common functions include</p>
 </div></div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>With that, invoking <code>solver.solve()</code> produces an iterator over multiple solutions.</p>
+<p>With that, invoking <code>solver.solve()</code> returns a <em>solution</em> for the constraints.</p>
 
 </div>
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[70]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[84]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">str</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[84]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>&#39;(910)910-7342&#39;</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><code>solve()</code> returns a derivation tree, which typically is converted into a string using <code>str()</code> as above. The <code>print()</code> function does this implicitly.</p>
+
+</div>
+</div></div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Subsequent calls of <code>solve()</code> return more solutions:</p>
+
+</div>
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[85]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">())</span>
 </pre></div>
 
      </div>
@@ -19212,16 +19603,16 @@ Common functions include</p>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>(984)451-2706
-(903)831-0847
-(902)468-5290
-(904)348-3721
-(908)771-6402
-(980)281-2704
-(909)528-9146
-(912)643-6982
-(910)638-7014
-(901)896-7204
+<pre>(910)565-8296
+(910)440-0369
+(910)608-6457
+(910)700-3479
+(910)326-1972
+(910)814-1878
+(910)294-0408
+(910)705-1344
+(910)689-0159
+(904)209-7853
 </pre>
 </div>
 </div>
@@ -19239,10 +19630,181 @@ Common functions include</p>
 </div></div></section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>The <code>solve()</code> method provides several additional parameters to configure the solver, as documented below
+<p>The <code>ISLaSolver()</code> constructor provides several additional parameters to configure the solver, as documented below.
 Additional <code>ISLaSolver</code> methods allow to check inputs against constraints, and provide additional functionality.</p>
 
 </div>
+</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[86]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># ignore</span>
+<span class="kn">from</span> <span class="nn">ClassDiagram</span> <span class="kn">import</span> <span class="n">display_class_hierarchy</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[87]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">display_class_hierarchy</span><span class="p">([</span><span class="n">ISLaSolver</span><span class="p">],</span>
+                         <span class="n">public_methods</span><span class="o">=</span><span class="p">[</span>
+                            <span class="n">ISLaSolver</span><span class="o">.</span><span class="fm">__init__</span><span class="p">,</span>
+                            <span class="n">ISLaSolver</span><span class="o">.</span><span class="n">solve</span><span class="p">,</span>
+                            <span class="n">ISLaSolver</span><span class="o">.</span><span class="n">check</span><span class="p">,</span>
+                            <span class="n">ISLaSolver</span><span class="o">.</span><span class="n">parse</span><span class="p">,</span>
+                        <span class="p">])</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[87]:</div>
+
+
+
+<div class="jp-RenderedSVG jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="image/svg+xml">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 5.0.0 (20220707.1540)
+ -->
+<!-- Pages: 1 -->
+<svg width="228pt" height="84pt"
+ viewBox="0.00 0.00 228.00 84.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 80)">
+<g id="a_graph0"><a xlink:title="ISLaSolver class hierarchy">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-80 224,-80 224,4 -4,4"/>
+</a>
+</g>
+<!-- ISLaSolver -->
+<g id="node1" class="node">
+<title>ISLaSolver</title>
+<g id="a_node1"><a xlink:href="isla.solver.ipynb" xlink:title="class ISLaSolver:&#10;The solver class for ISLa formulas/constraints. Its methods are&#10;`solve()`, `check(DerivationTree | str)`, and `parse(str)`.">
+<polygon fill="none" stroke="black" points="0,-0.5 0,-75.5 82,-75.5 82,-0.5 0,-0.5"/>
+<text text-anchor="start" x="8" y="-61.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">ISLaSolver</text>
+<polyline fill="none" stroke="black" points="0,-52.5 82,-52.5 "/>
+<g id="a_node1_0"><a xlink:href="#" xlink:title="ISLaSolver">
+<g id="a_node1_1"><a xlink:href="isla.solver.ipynb" xlink:title="__init__(self, grammar: Union[Dict[str, List[str]], str], formula: isla.language.Formula | str = &#39;true&#39;, structural_predicates: Set[isla.language.StructuralPredicate] = {Predicate(nth, 3), Predicate(after, 2), Predicate(inside, 2), Predicate(level, 4), Predicate(before, 2), Predicate(same_position, 2), Predicate(different_position, 2), Predicate(consecutive, 2), Predicate(direct_child, 2)}, semantic_predicates: Set[isla.language.SemanticPredicate] = {SemanticPredicate(count, 3)}, max_number_free_instantiations: int = 10, max_number_smt_instantiations: int = 10, max_number_tree_insertion_results: int = 5, enforce_unique_trees_in_queue: bool = True, debug: bool = False, cost_computer: Optional[ForwardRef(&#39;CostComputer&#39;)] = None, timeout_seconds: Optional[int] = None, global_fuzzer: bool = False, predicates_unique_in_int_arg: Tuple[isla.language.SemanticPredicate, ...] = (SemanticPredicate(count, 3),), fuzzer_factory: Callable[[Dict[str, List[str]]], isla.fuzzer.GrammarFuzzer] = &lt;function ISLaSolver.&lt;lambda&gt; at 0x117c18550&gt;, tree_insertion_methods: Optional[int] = None, activate_unsat_support: bool = False, grammar_unwinding_threshold: int = 4):&#10;Constructs a new ISLaSolver object. Passing a grammar and a formula is mandatory.&#10;&#10;:param grammar: The underlying grammar; either, as a &quot;Fuzzing Book&quot; dictionary or in BNF syntax.&#10;:param formula: The formula to solve; either a string or a readily parsed formula.&#10;:param structural_predicates: Structural predicates to use when parsing a formula.&#10;:param semantic_predicates: Semantic predicates to use when parsing a formula.&#10;:param max_number_free_instantiations: Number of times that nonterminals that are not bound by any formula&#10;should be expanded by a coverage&#45;based fuzzer.&#10;:param max_number_smt_instantiations: Number of solutions of SMT formulas that should be produced.&#10;:param max_number_tree_insertion_results: The maximum number of results when solving existential quantifiers&#10;by tree insertion.&#10;:param enforce_unique_trees_in_queue: If true, states with the same tree as an already existing tree in the&#10;queue are discarded, irrespectively of the constraint.&#10;:param debug: If true, debug information about the evolution of states is collected, notably in the&#10;field state_tree. The root of the tree is in the field state_tree_root. The field costs stores the computed&#10;cost values for all new nodes.&#10;:param cost_computer: The `CostComputer` class for computing the cost relevant to placing states&#10;in ISLa&#39;s queue.&#10;:param timeout_seconds: Number of seconds after which the solver will terminate.&#10;:param global_fuzzer: If set to True, only one coverage&#45;guided grammar fuzzer object is used to finish&#10;off unconstrained open derivation trees throughout the whole generation time. This may be beneficial for&#10;some targets; e.g., we experienced that CSV works significantly faster. However, the achieved k&#45;path coverage&#10;can be lower with that setting.&#10;:param predicates_unique_in_int_arg: This is needed in certain cases for instantiating universal&#10;integer quantifiers. The supplied predicates should have exactly one integer argument, and hold&#10;for exactly one integer value once all other parameters are fixed.&#10;:param fuzzer_factory: Constructor of the fuzzer to use for instantiating &quot;free&quot; nonterminals.&#10;:param tree_insertion_methods: Combination of methods to use for existential quantifier elimination by&#10;tree insertion. Full selection: `DIRECT_EMBEDDING &amp; SELF_EMBEDDING &amp; CONTEXT_ADDITION`.&#10;:param activate_unsat_support: Set to True if you assume that a formula might be unsatisfiable. This&#10;triggers additional tests for unsatisfiability that reduce input generation performance, but might&#10;ensure termination (with a negative solver result) for unsatisfiable problems for which the solver&#10;could otherwise diverge.&#10;:param grammar_unwinding_threshold: When querying the SMT solver, ISLa passes a regular expression for&#10;the syntax of the involved nonterminals. If this syntax is not regular, we unwind the respective part&#10;in the reference grammar up to a depth of `grammar_unwinding_threshold`. If this is too shallow, it can&#10;happen that an equation etc. cannot be solved; if it is too deep, it can negatively impact performance&#10;(and quite tremendously so).">
+<text text-anchor="start" x="11" y="-41.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node1_2"><a xlink:href="isla.solver.ipynb" xlink:title="check(self, inp: isla.derivation_tree.DerivationTree | str) &#45;&gt; bool:&#10;Evaluates whether the given derivation tree satisfies the constraint passed to&#10;the solver. Raises an `UnknownResultError` if this could not be evaluated&#10;(e.g., because of a solver timeout or a semantic predicate that cannot be&#10;evaluated).&#10;&#10;:param inp: The input to evaluate, either readily parsed or as a string.&#10;:return: A truth value.">
+<text text-anchor="start" x="11" y="-30.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">check()</text>
+</a>
+</g>
+<g id="a_node1_3"><a xlink:href="isla.solver.ipynb" xlink:title="parse(self, inp: str, nonterminal: str = &#39;&lt;start&gt;&#39;) &#45;&gt; isla.derivation_tree.DerivationTree:&#10;Parses the given input `inp`. Raises a `SyntaxError` if the input does not&#10;satisfy the grammar, a `SemanticError` if it does not satisfy the constraint&#10;(this is only checked if `nonterminal` is &quot;&lt;start&gt;&quot;), and returns the parsed&#10;`DerivationTree` otherwise.&#10;&#10;:param inp: The input to parse.&#10;:param nonterminal: The nonterminal to start parsing with, if a string&#10;corresponding to a sub&#45;grammar shall be parsed. We don&#39;t check semantic&#10;correctness in that case.&#10;:return: A parsed `DerivationTree`.">
+<text text-anchor="start" x="11" y="-19.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">parse()</text>
+</a>
+</g>
+<g id="a_node1_4"><a xlink:href="isla.solver.ipynb" xlink:title="solve(self) &#45;&gt; isla.derivation_tree.DerivationTree:&#10;Attempts to compute a solution to the given ISLa formula. Returns that solution,&#10;if any. This function can be called repeatedly to obtain more solutions until&#10;one of two exception types is raised: A `StopIteration` indicates that no more&#10;solution can be found; a `SolverTimeout` is raised if a timeout occurred.&#10;After that, an exception will be raised every time.&#10;&#10;The timeout can be controlled by the `timeout_seconds` constructor parameter.&#10;&#10;:return: A solution for the ISLa formula passed to the `ISLaSolver`.">
+<text text-anchor="start" x="11" y="-8.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">solve()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- Legend -->
+<g id="node2" class="node">
+<title>Legend</title>
+<text text-anchor="start" x="100" y="-55.5" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="100" y="-45.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="107" y="-45.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="100" y="-35.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="107" y="-35.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="100" y="-25.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="107" y="-25.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="100" y="-16.3" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>The ISLa functionality is also available on the command line:</p>
+
+</div>
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[88]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>isla --help
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>usage: isla [-h] [-v] {solve,fuzz,check,parse,create} ...
+
+The ISLa command line interface.
+
+options:
+  -h, --help            show this help message and exit
+  -v, --version         Print the ISLa version number
+
+Commands:
+  {solve,fuzz,check,parse,create}
+    solve               create solutions to ISLa constraints or check their
+                        unsatisfiability
+    fuzz                pass solutions to an ISLa constraint to a test subject
+    check               check whether an input satisfies an ISLa constraint
+    parse               parse an input into a derivation tree if it satisfies
+                        an ISLa constraint
+    create              create grammar and constraint stubs
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
 </div></section></section><section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
