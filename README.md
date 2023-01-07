@@ -2,11 +2,11 @@
 
 <!-- Badges to be shown on project page -->
 
-[![Python 3.9 Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml)
-&nbsp;
-[![Python 3.10 Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code-3-10.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code-3-10.yml)
+[![Python Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml)
 &nbsp;
 [![Notebook Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-notebooks.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-notebooks.yml)
+&nbsp;
+[![Static Type Checking](https://github.com/uds-se/fuzzingbook/actions/workflows/check-types.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-types.yml)
 &nbsp;
 [![Imports](https://github.com/uds-se/fuzzingbook/actions/workflows/check-imports.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-imports.yml)
 &nbsp;
@@ -164,7 +164,7 @@ At this point, we do not provide support for PDF versions.  We will be producing
 
 #### I have a question, comment, or a suggestion.  What do I do?
 
-You can [tweet to @fuzzingbook on Twitter](https://twitter.com/fuzzingbook), allowing the community of readers to chime in.  For bugs you'd like to get fixed, report an issue on the [development page](https://github.com/uds-se/fuzzingbook/issues).
+You can [tweet to @fuzzingbook on Twitter](https://twitter.com/fuzzingbook), allowing the community of readers to chime in.  For bugs that you'd like to get fixed, report an issue on the [development page](https://github.com/uds-se/fuzzingbook/issues).
 
 #### I have reported an issue two weeks ago.  When will it be addressed?
 
