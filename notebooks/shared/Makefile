@@ -512,6 +512,7 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--title="$(BOOKTITLE)" \
 	--authors="$(AUTHORS)" \
 	--twitter="$(TWITTER)" \
+	--mastodon="$(MASTODON)" \
 	--all-chapters="$(ALL_CHAPTER_SOURCES) $(APPENDICES_SOURCES)" \
 	--public-chapters="$(CHAPTER_SOURCES) $(APPENDICES_SOURCES)" \
 	--ready-chapters="$(READY_SOURCES)" \
@@ -994,7 +995,8 @@ publish-html: html publish-html-setup \
 	$(DOCS_TARGET)html/00_Index.html \
 	$(DOCS_TARGET)html/00_Table_of_Contents.html \
 	$(DOCS_TARGET)html/custom.css \
-	$(DOCS_TARGET)html/favicon \
+	$(DOCS_TARGET)html/mastodon-timeline.css \
+	$(DOCS_TARGET)html/mastodon-timeline.js \
 	$(DOCS:%=$(DOCS_TARGET)html/%.html) \
 	$(DOCS:%=$(DOCS_TARGET)html/%_files)
 
@@ -1201,13 +1203,11 @@ $(NOTEBOOKS)/PICS/appicon.png: $(NOTEBOOKS)/PICS/Icon.png
 # and then 'from fuzzingbook.Fuzzer import Fuzzer' :-)
 .PHONY: upload upload-dist upload-test
 upload upload-dist: dist
-	@echo "Use your pypi.org password to upload"
-	cd $(DOCS_TARGET); twine upload dist/*.tar.gz
+	cd $(DOCS_TARGET); twine upload --repository $(PROJECT) dist/*.tar.gz
 	@echo "Use 'pip install $(PROJECT)' to install"
 
 upload-test: dist
-	@echo "Use your pypi.org password to upload"
-	cd $(DOCS_TARGET); twine upload --repository-url https://test.pypi.org/legacy/ dist/*.tar.gz
+	cd $(DOCS_TARGET); twine upload --repository $(PROJECT)-test dist/*.tar.gz
 	@echo "Use 'pip install --extra-index-url https://test.pypi.org/simple/ $(PROJECT)' to install"
 
 
