@@ -7,10 +7,10 @@ const MIN_PROGRESS_SEGMENT_HEIGHT = 6;
 const MIN_PLAYHEAD_HEIGHT = 8;
 
 /**
- * The reader mode lets you read a reveal.js presentation
+ * The scroll view lets you read a reveal.js presentation
  * as a linear scrollable page.
  */
-export default class Reader {
+export default class ScrollView {
 
 	constructor( Reveal ) {
 
@@ -24,7 +24,7 @@ export default class Reader {
 	}
 
 	/**
-	 * Activates the reader mode. This rearranges the presentation DOM
+	 * Activates the scroll view. This rearranges the presentation DOM
 	 * by—among other things—wrapping each slide in a page element.
 	 */
 	activate() {
@@ -36,13 +36,12 @@ export default class Reader {
 		this.active = true;
 
 		// Store the full presentation HTML so that we can restore it
-		// when/if the reader mode is deactivated
+		// when/if the scroll view is deactivated
 		this.slideHTMLBeforeActivation = this.Reveal.getSlidesElement().innerHTML;
 
 		const horizontalSlides = queryAll( this.Reveal.getRevealElement(), HORIZONTAL_SLIDES_SELECTOR );
 
-		this.viewportElement.classList.add( 'loading-scroll-mode', 'reveal-reader' );
-		this.viewportElement.addEventListener( 'scroll', this.onScroll, { passive: true } );
+		this.viewportElement.classList.add( 'loading-scroll-mode', 'reveal-scroll' );
 
 		let presentationBackground;
 
@@ -66,15 +65,15 @@ export default class Reader {
 			// group it under the same page element as the previous slide
 			if( previousSlide && this.Reveal.shouldAutoAnimateBetween( previousSlide, slide ) ) {
 				contentContainer = document.createElement( 'div' );
-				contentContainer.className = 'reader-page-content reader-auto-animate-page';
+				contentContainer.className = 'scroll-page-content scroll-auto-animate-page';
 				contentContainer.style.display = 'none';
-				previousSlide.closest( '.reader-page-content' ).parentNode.appendChild( contentContainer );
+				previousSlide.closest( '.scroll-page-content' ).parentNode.appendChild( contentContainer );
 			}
 			else {
 				// Wrap the slide in a page element and hide its overflow
 				// so that no page ever flows onto another
 				const page = document.createElement( 'div' );
-				page.className = 'reader-page';
+				page.className = 'scroll-page';
 				pageElements.push( page );
 
 				// Copy the presentation-wide background to each page
@@ -83,11 +82,11 @@ export default class Reader {
 				}
 
 				const stickyContainer = document.createElement( 'div' );
-				stickyContainer.className = 'reader-page-sticky';
+				stickyContainer.className = 'scroll-page-sticky';
 				page.appendChild( stickyContainer );
 
 				contentContainer = document.createElement( 'div' );
-				contentContainer.className = 'reader-page-content';
+				contentContainer.className = 'scroll-page-content';
 				stickyContainer.appendChild( contentContainer );
 			}
 
@@ -134,15 +133,18 @@ export default class Reader {
 		this.Reveal.layout();
 		this.Reveal.setState( stateBeforeActivation );
 
-		this.viewportElement.classList.remove( 'loading-scroll-mode' );
-
 		this.activatedCallbacks.forEach( callback => callback() );
 		this.activatedCallbacks = [];
+
+		this.restoreScrollPosition();
+
+		this.viewportElement.classList.remove( 'loading-scroll-mode' );
+		this.viewportElement.addEventListener( 'scroll', this.onScroll, { passive: true } );
 
 	}
 
 	/**
-	 * Deactivates the reader mode and restores the standard slide-based
+	 * Deactivates the scroll view and restores the standard slide-based
 	 * presentation.
 	 */
 	deactivate() {
@@ -154,7 +156,7 @@ export default class Reader {
 		this.active = false;
 
 		this.viewportElement.removeEventListener( 'scroll', this.onScroll );
-		this.viewportElement.classList.remove( 'reveal-reader' );
+		this.viewportElement.classList.remove( 'reveal-scroll' );
 
 		this.removeProgressBar();
 
@@ -178,7 +180,7 @@ export default class Reader {
 	}
 
 	/**
-	 * Checks if the reader mode is currently active.
+	 * Checks if the scroll view is currently active.
 	 */
 	isActive() {
 
@@ -192,14 +194,14 @@ export default class Reader {
 	createProgressBar() {
 
 		this.progressBar = document.createElement( 'div' );
-		this.progressBar.className = 'reader-progress';
+		this.progressBar.className = 'scrollbar';
 
 		this.progressBarInner = document.createElement( 'div' );
-		this.progressBarInner.className = 'reader-progress-inner';
+		this.progressBarInner.className = 'scrollbar-inner';
 		this.progressBar.appendChild( this.progressBarInner );
 
 		this.progressBarPlayhead = document.createElement( 'div' );
-		this.progressBarPlayhead.className = 'reader-progress-playhead';
+		this.progressBarPlayhead.className = 'scrollbar-playhead';
 		this.progressBarInner.appendChild( this.progressBarPlayhead );
 
 		this.viewportElement.insertBefore( this.progressBar, this.viewportElement.firstChild );
@@ -253,13 +255,13 @@ export default class Reader {
 
 		if( this.isActive() ) {
 			this.syncPages();
-			this.onScroll();
+			this.syncScrollPosition();
 		}
 
 	}
 
 	/**
-	 * Updates our reader pages to match the latest configuration and
+	 * Updates our pages to match the latest configuration and
 	 * presentation size.
 	 */
 	syncPages() {
@@ -268,32 +270,31 @@ export default class Reader {
 
 		const slideSize = this.Reveal.getComputedSlideSize( window.innerWidth, window.innerHeight );
 		const scale = this.Reveal.getScale();
-		const readerLayout = config.readerLayout;
+		const useCompactLayout = config.scrollLayout === 'compact';
 
 		const viewportHeight = this.viewportElement.offsetHeight;
 		const compactHeight = slideSize.height * scale;
-		const pageHeight = readerLayout === 'full' ? viewportHeight : compactHeight;
+		const pageHeight = useCompactLayout ? compactHeight : viewportHeight;
 
 		// The height that needs to be scrolled between scroll triggers
-		const scrollTriggerHeight = viewportHeight;
+		const scrollTriggerHeight = useCompactLayout ? compactHeight : viewportHeight;
 
 		this.viewportElement.style.setProperty( '--page-height', pageHeight + 'px' );
-		this.viewportElement.style.scrollSnapType = typeof config.readerScrollSnap === 'string' ?
-												`y ${config.readerScrollSnap}` : '';
+		this.viewportElement.style.scrollSnapType = typeof config.scrollSnap === 'string' ? `y ${config.scrollSnap}` : '';
 
 		// This will hold all scroll triggers used to show/hide slides
 		this.slideTriggers = [];
 
-		const pageElements = Array.from( this.Reveal.getRevealElement().querySelectorAll( '.reader-page' ) );
+		const pageElements = Array.from( this.Reveal.getRevealElement().querySelectorAll( '.scroll-page' ) );
 
 		this.pages = pageElements.map( pageElement => {
 			const page = this.createPage({
 				pageElement,
 				slideElement: pageElement.querySelector( 'section' ),
-				stickyElement: pageElement.querySelector( '.reader-page-sticky' ),
-				contentElement: pageElement.querySelector( '.reader-page-content' ),
+				stickyElement: pageElement.querySelector( '.scroll-page-sticky' ),
+				contentElement: pageElement.querySelector( '.scroll-page-content' ),
 				backgroundElement: pageElement.querySelector( '.slide-background' ),
-				autoAnimateElements: pageElement.querySelectorAll( '.reader-auto-animate-page' ),
+				autoAnimateElements: pageElement.querySelectorAll( '.scroll-auto-animate-page' ),
 				autoAnimatePages: []
 			});
 
@@ -322,7 +323,7 @@ export default class Reader {
 			}, page.autoAnimatePages.length );
 
 			// Clean up from previous renders
-			page.pageElement.querySelectorAll( '.reader-snap-point' ).forEach( el => el.remove() );
+			page.pageElement.querySelectorAll( '.scroll-snap-point' ).forEach( el => el.remove() );
 
 			// Create snap points for all scroll triggers
 			// - Can't be absolute in FF
@@ -331,8 +332,9 @@ export default class Reader {
 			//   inner triggers won't work
 			for( let i = 0; i < totalScrollTriggerCount + 1; i++ ) {
 				const triggerStick = document.createElement( 'div' );
-				triggerStick.className = 'reader-snap-point';
+				triggerStick.className = 'scroll-snap-point';
 				triggerStick.style.height = scrollTriggerHeight + 'px';
+				triggerStick.style.scrollSnapAlign = useCompactLayout ? 'center' : 'start';
 				page.pageElement.appendChild( triggerStick );
 
 				if( i === 0 ) {
@@ -343,7 +345,7 @@ export default class Reader {
 			// In the compact layout, only slides with scroll triggers cover the
 			// full viewport height. This helps avoid empty gaps before or after
 			// a sticky slide.
-			if( readerLayout === 'compact' && page.scrollTriggers.length > 0 ) {
+			if( useCompactLayout && page.scrollTriggers.length > 0 ) {
 				page.pageHeight = viewportHeight;
 				page.pageElement.style.setProperty( '--page-height', viewportHeight + 'px' );
 			}
@@ -381,15 +383,15 @@ export default class Reader {
 			return {
 				range: `${t.range[0].toFixed(2)}-${t.range[1].toFixed(2)}`,
 				triggers: t.page.scrollTriggers.map( t => {
-					return `${t.globalRange[0].toFixed(2)}-${t.globalRange[1].toFixed(2)}`
+					return `${t.range[0].toFixed(2)}-${t.range[1].toFixed(2)}`
 				}).join( ', ' ),
 			}
 		}))
 		*/
 
-		this.viewportElement.setAttribute( 'data-reader-scroll-bar', config.readerScrollbar );
+		this.viewportElement.setAttribute( 'data-scrollbar', config.scrollProgress );
 
-		if( config.readerScrollbar && this.totalScrollTriggerCount > 1 ) {
+		if( config.scrollProgress && this.totalScrollTriggerCount > 1 ) {
 			// Create the progress bar if it doesn't already exist
 			if( !this.progressBar ) this.createProgressBar();
 
@@ -422,17 +424,16 @@ export default class Reader {
 				rangeStart + Math.max( trigger.page.scrollTriggers.length, 1 ) / this.totalScrollTriggerCount
 			];
 
-			const slideRange = trigger.range[1] - trigger.range[0];
-			const slideRangeSegmentSize = 1 / trigger.page.scrollTriggers.length;
+			const scrollTriggerSegmentSize = ( trigger.range[1] - trigger.range[0] ) / trigger.page.scrollTriggers.length;
 
 			// Set the range for each inner scroll trigger
 			trigger.page.scrollTriggers.forEach( ( scrollTrigger, i ) => {
-				scrollTrigger.range = [i * slideRangeSegmentSize, ( i + 1 ) * slideRangeSegmentSize];
-				scrollTrigger.globalRange = [
-					rangeStart + scrollTrigger.range[0] * slideRange,
-					rangeStart + scrollTrigger.range[1] * slideRange
+				scrollTrigger.range = [
+					rangeStart + i * scrollTriggerSegmentSize,
+					rangeStart + ( i + 1 ) * scrollTriggerSegmentSize
 				];
 			} );
+
 			rangeStart = trigger.range[1];
 		} );
 
@@ -532,7 +533,7 @@ export default class Reader {
 	 */
 	syncProgressBar() {
 
-		this.progressBarInner.querySelectorAll( '.reader-progress-slide' ).forEach( slide => slide.remove() );
+		this.progressBarInner.querySelectorAll( '.scrollbar-slide' ).forEach( slide => slide.remove() );
 
 		const scrollHeight = this.viewportElement.scrollHeight;
 		const viewportHeight = this.viewportElement.offsetHeight;
@@ -550,27 +551,25 @@ export default class Reader {
 		// Don't show individual segments if they're too small
 		if( progressSegmentHeight > MIN_PROGRESS_SEGMENT_HEIGHT ) {
 
-			this.slideTriggers.forEach( trigger => {
+			this.slideTriggers.forEach( slideTrigger => {
 
-				const { page } = trigger;
+				const { page } = slideTrigger;
 
 				// Visual representation of a slide
 				page.progressBarSlide = document.createElement( 'div' );
-				page.progressBarSlide.className = 'reader-progress-slide';
-				page.progressBarSlide.style.top = trigger.range[0] * this.progressBarHeight + 'px';
-				page.progressBarSlide.style.height = ( trigger.range[1] - trigger.range[0] ) * this.progressBarHeight - spacing + 'px';
+				page.progressBarSlide.className = 'scrollbar-slide';
+				page.progressBarSlide.style.top = slideTrigger.range[0] * this.progressBarHeight + 'px';
+				page.progressBarSlide.style.height = ( slideTrigger.range[1] - slideTrigger.range[0] ) * this.progressBarHeight - spacing + 'px';
 				page.progressBarSlide.classList.toggle( 'has-triggers', page.scrollTriggers.length > 0 );
 				this.progressBarInner.appendChild( page.progressBarSlide );
 
-				const scrollBarSlideHeight = ( trigger.range[1] - trigger.range[0] ) * this.progressBarHeight;
-
 				// Visual representations of each scroll trigger
-				trigger.page.scrollTriggerElements = page.scrollTriggers.map( ( trigger, i ) => {
+				page.scrollTriggerElements = page.scrollTriggers.map( ( trigger, i ) => {
 
 					const triggerElement = document.createElement( 'div' );
-					triggerElement.className = 'reader-progress-trigger';
-					triggerElement.style.top = trigger.range[0] * scrollBarSlideHeight + 'px';
-					triggerElement.style.height = ( trigger.range[1] - trigger.range[0] ) * scrollBarSlideHeight - spacing + 'px';
+					triggerElement.className = 'scrollbar-trigger';
+					triggerElement.style.top = ( trigger.range[0] - slideTrigger.range[0] ) * this.progressBarHeight + 'px';
+					triggerElement.style.height = ( trigger.range[1] - trigger.range[0] ) * this.progressBarHeight - spacing + 'px';
 					page.progressBarSlide.appendChild( triggerElement );
 
 					if( i === 0 ) triggerElement.style.display = 'none';
@@ -587,6 +586,67 @@ export default class Reader {
 			this.pages.forEach( page => page.progressBarSlide = null );
 
 		}
+
+	}
+
+	/**
+	 * Reads the current scroll position and updates our active
+	 * trigger states accordingly.
+	 */
+	syncScrollPosition() {
+
+		const viewportHeight = this.viewportElement.offsetHeight;
+		const viewportHeightFactor = viewportHeight / this.viewportElement.scrollHeight;
+
+		const scrollTop = this.viewportElement.scrollTop;
+		const scrollHeight = this.viewportElement.scrollHeight - viewportHeight
+		const scrollProgress = Math.max( Math.min( scrollTop / scrollHeight, 1 ), 0 );
+		const scrollProgressMid = Math.max( Math.min( ( scrollTop + viewportHeight / 2 ) / this.viewportElement.scrollHeight, 1 ), 0 );
+
+		let activePage;
+
+		this.slideTriggers.forEach( ( trigger ) => {
+			const { page } = trigger;
+
+			const shouldPreload = scrollProgress >= trigger.range[0] - viewportHeightFactor*2 &&
+														scrollProgress <= trigger.range[1] + viewportHeightFactor*2;
+
+			// Load slides that are within the preload range
+			if( shouldPreload && !page.loaded ) {
+				page.loaded = true;
+				this.Reveal.slideContent.load( page.slideElement );
+			}
+			else if( page.loaded ) {
+				page.loaded = false;
+				this.Reveal.slideContent.unload( page.slideElement );
+			}
+
+			// If we're within this trigger range, activate it
+			if( scrollProgress >= trigger.range[0] && scrollProgress <= trigger.range[1] ) {
+				this.activateTrigger( trigger );
+				activePage = trigger.page;
+			}
+			// .. otherwise deactivate
+			else if( trigger.active ) {
+				this.deactivateTrigger( trigger );
+			}
+		} );
+
+		// Each page can have its own scroll triggers, check if any of those
+		// need to be activated/deactivated
+		if( activePage ) {
+			activePage.scrollTriggers.forEach( ( trigger ) => {
+				if( scrollProgressMid >= trigger.range[0] && scrollProgressMid <= trigger.range[1] ) {
+					this.activateTrigger( trigger );
+				}
+				else if( trigger.active ) {
+					this.deactivateTrigger( trigger );
+				}
+			} );
+		}
+
+		// Update our visual progress indication
+		this.setProgressBarValue( scrollTop / ( this.viewportElement.scrollHeight - viewportHeight ) );
 
 	}
 
@@ -627,10 +687,12 @@ export default class Reader {
 
 		clearTimeout( this.hideProgressBarTimeout );
 
-		if( this.Reveal.getConfig().readerScrollbar === 'auto' && !this.draggingProgressBar ) {
+		if( this.Reveal.getConfig().scrollProgress === 'auto' && !this.draggingProgressBar ) {
 
 			this.hideProgressBarTimeout = setTimeout( () => {
-				this.progressBar.classList.remove( 'visible' );
+				if( this.progressBar ) {
+					this.progressBar.classList.remove( 'visible' );
+				}
 			}, HIDE_SCROLLBAR_TIMEOUT );
 
 		}
@@ -644,7 +706,7 @@ export default class Reader {
 	 */
 	scrollToSlide( slideElement ) {
 
-		// If the reader mode isn't active yet, queue this action
+		// If the scroll view isn't active yet, queue this action
 		if( !this.active ) {
 			this.activatedCallbacks.push( () => this.scrollToSlide( slideElement ) );
 		}
@@ -661,7 +723,38 @@ export default class Reader {
 	}
 
 	/**
-	 * Activates the given page and starts its embedded conten
+	 * Persists the current scroll position to session storage
+	 * so that it can be restored.
+	 */
+	storeScrollPosition() {
+
+		clearTimeout( this.storeScrollPositionTimeout );
+
+		this.storeScrollPositionTimeout = setTimeout( () => {
+			sessionStorage.setItem( 'reveal-scroll-top', this.viewportElement.scrollTop );
+			sessionStorage.setItem( 'reveal-scroll-origin', location.origin + location.pathname );
+
+			this.storeScrollPositionTimeout = null;
+		}, 50 );
+
+	}
+
+	/**
+	 * Restores the scroll position when a deck is reloader.
+	 */
+	restoreScrollPosition() {
+
+		const scrollPosition = sessionStorage.getItem( 'reveal-scroll-top' );
+		const scrollOrigin = sessionStorage.getItem( 'reveal-scroll-origin' );
+
+		if( scrollPosition && scrollOrigin === location.origin + location.pathname ) {
+			this.viewportElement.scrollTop = parseInt( scrollPosition, 10 );
+		}
+
+	}
+
+	/**
+	 * Activates the given page and starts its embedded content
 	 * if there is any.
 	 *
 	 * @param {object} page
@@ -677,15 +770,18 @@ export default class Reader {
 			contentElement.style.display = 'block';
 
 			slideElement.classList.add( 'present' );
-			backgroundElement.classList.add( 'present' );
 
-			this.Reveal.setCurrentReaderPage( slideElement, indexh, indexv );
+			if( backgroundElement ) {
+				backgroundElement.classList.add( 'present' );
+			}
+
+			this.Reveal.setCurrentScrollPage( slideElement, indexh, indexv );
 			this.Reveal.backgrounds.bubbleSlideContrastClassToElement( slideElement, this.viewportElement );
 
 			// If this page is part of an auto-animation there will be one
 			// content element per auto-animated page. We need to show the
 			// current page and hide all others.
-			Array.from( contentElement.parentNode.querySelectorAll( '.reader-page-content' ) ).forEach( sibling => {
+			Array.from( contentElement.parentNode.querySelectorAll( '.scroll-page-content' ) ).forEach( sibling => {
 				if( sibling !== contentElement ) {
 					sibling.style.display = 'none';
 				}
@@ -765,7 +861,7 @@ export default class Reader {
 	}
 
 	/**
-	 * Get a list of all pages in the reader moder. This includes
+	 * Get a list of all pages in the scroll view. This includes
 	 * both top-level slides and auto-animate steps.
 	 *
 	 * @returns {Array}
@@ -778,58 +874,8 @@ export default class Reader {
 
 	onScroll() {
 
-		const viewportHeight = this.viewportElement.offsetHeight;
-		const viewportHeightFactor = viewportHeight / this.viewportElement.scrollHeight;
-
-		const scrollTop = this.viewportElement.scrollTop;
-		const scrollHeight = this.viewportElement.scrollHeight - viewportHeight
-		const scrollProgress = Math.max( Math.min( scrollTop / scrollHeight, 1 ), 0 );
-		const scrollProgressMid = Math.max( Math.min( ( scrollTop + viewportHeight / 2 ) / this.viewportElement.scrollHeight, 1 ), 0 );
-
-		let activePage;
-
-		this.slideTriggers.forEach( ( trigger ) => {
-			const { page } = trigger;
-
-			const shouldPreload = scrollProgress >= trigger.range[0] - viewportHeightFactor*2 &&
-														scrollProgress <= trigger.range[1] + viewportHeightFactor*2;
-
-			// Load slides that are within the preload range
-			if( shouldPreload && !page.loaded ) {
-				page.loaded = true;
-				this.Reveal.slideContent.load( page.slideElement );
-			}
-			else if( page.loaded ) {
-				page.loaded = false;
-				this.Reveal.slideContent.unload( page.slideElement );
-			}
-
-			// If we're within this trigger range, activate it
-			if( scrollProgress >= trigger.range[0] && scrollProgress <= trigger.range[1] ) {
-				this.activateTrigger( trigger );
-				activePage = trigger.page;
-			}
-			// .. otherwise deactivate
-			else if( trigger.active ) {
-				this.deactivateTrigger( trigger );
-			}
-		} );
-
-		// Each page can have its own scroll triggers, check if any of those
-		// need to be activated/deactivated
-		if( activePage ) {
-			activePage.scrollTriggers.forEach( ( trigger ) => {
-				if( scrollProgressMid >= trigger.globalRange[0] && scrollProgressMid <= trigger.globalRange[1] ) {
-					this.activateTrigger( trigger );
-				}
-				else if( trigger.active ) {
-					this.deactivateTrigger( trigger );
-				}
-			} );
-		}
-
-		// Update our visual progress indication
-		this.setProgressBarValue( scrollTop / ( this.viewportElement.scrollHeight - viewportHeight ) );
+		this.syncScrollPosition();
+		this.storeScrollPosition();
 
 	}
 
