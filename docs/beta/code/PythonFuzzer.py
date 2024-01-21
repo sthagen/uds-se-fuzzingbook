@@ -3,7 +3,7 @@
 
 # "Testing Compilers" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/PythonFuzzer.html
-# Last change: 2024-01-17 18:02:34+01:00
+# Last change: 2024-01-18 18:26:52+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors

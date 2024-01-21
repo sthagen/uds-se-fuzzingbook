@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2024-01-17 17:55:42+01:00
+# Last change: 2024-01-18 18:19:50+01:00
 #
 # Copyright (c) 2021-2023 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -75,7 +75,7 @@ Here, we instantiate the ISLa solver with a constraint stating that the area cod
 With that, invoking `solver.solve()` returns a _solution_ for the constraints.
 
 >>> str(solver.solve())
-'(903)805-6934'
+'(907)203-4265'
 
 `solve()` returns a derivation tree, which typically is converted into a string using `str()` as above. The `print()` function does this implicitly.
 
@@ -83,16 +83,16 @@ Subsequent calls of `solve()` return more solutions:
 
 >>> for _ in range(10):
 >>>     print(solver.solve())
-(903)671-8520
-(903)308-8044
-(903)737-2584
-(903)500-2834
-(903)429-5794
-(903)292-0499
-(903)977-9111
-(903)209-4775
-(903)565-2710
-(901)223-7794
+(907)789-2197
+(907)994-3910
+(907)305-0189
+(907)617-4056
+(907)401-3406
+(907)557-9854
+(907)898-8434
+(907)430-2840
+(907)866-1743
+(906)893-5683
 
 
 We see that the solver produces a number of inputs that all satisfy the constraint - the area code is always more than 900.
