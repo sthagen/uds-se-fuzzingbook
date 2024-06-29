@@ -47,7 +47,7 @@ RENDERED_NOTEBOOKS = rendered
 
 # Git repo
 GITHUB_REPO = https://github.com/uds-se/$(PROJECT)/
-BINDER_URL = https://mybinder.org/v2/gh/uds-se/$(PROJECT)/master?filepath=docs/beta/notebooks/00_Table_of_Contents.ipynb
+BINDER_URL =  https://mybinder.org/v2/gh/uds-se/$(PROJECT)/HEAD?labpath=docs/beta/notebooks/00_Table_of_Contents.ipynb
 PROJECT_URL = https://www.$(PROJECT).org/beta/
 
 # Sources in the notebooks folder
@@ -1249,13 +1249,15 @@ push: .FORCE shared
 # Debugging binder
 # This is the same system as mybinder uses, but should be easier to debug
 # See https://repo2docker.readthedocs.io/en/latest/
+# and https://discourse.jupyter.org/t/tip-debug-binder-builds-faster-with-repo2docker/
 .PRECIOUS: binder/binder.log
 .PHONY: binder-local debug-binder
 binder-local debug-binder: binder/binder.log binder/postBuild
 binder/binder.log: .FORCE
 	@echo Writing output to $@
 	@docker version > /dev/null
-	jupyter-repo2docker --debug $(GITHUB_REPO) 2>&1 | tee $@
+	@# jupyter-repo2docker --debug $(GITHUB_REPO) 2>&1 | tee $@
+	repo2docker -v '.:.' --Repo2Docker.platform=linux/amd64 . 2>&1 | tee $@
 
 
 ## Docker services (experimental)
