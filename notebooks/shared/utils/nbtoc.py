@@ -51,25 +51,30 @@ def get_intro(notebook):
 def markdown_to_text(s):
     """Convert Markdown to plain text"""
     html = markdown.markdown(s)
-    return "".join(BeautifulSoup(html, features='lxml').findAll(text=True)).strip()
+    return "".join(BeautifulSoup(html, features='lxml').findAll(string=True)).strip()
     
 def text_to_tooltip(s):
     """Convert plain text to tooltip"""
     return html.escape(s).replace('\n', '&#10;')
 
-def notebook_toc_entry(notebook_name, prefix, path=None, tooltips=True):
+def notebook_toc_entry(notebook_name, prefix, path=None, tooltips=False, add_intro=False):
     # notebook_path = import_notebooks.find_notebook(notebook_name, path)
     notebook_path = notebook_name
     notebook_title = get_title(notebook_path)
+    notebook_intro = get_intro(notebook_path)
     notebook_basename = os.path.basename(notebook_name)
     notebook_base = os.path.splitext(notebook_basename)[0]
-    notebook_intro = markdown_to_text(get_intro(notebook_path))
-    notebook_tooltip = text_to_tooltip(f'{notebook_title} ({notebook_base})\n\n{notebook_intro}')
+    notebook_intro_text = markdown_to_text(notebook_intro)
+    notebook_tooltip = text_to_tooltip(f'{notebook_title} ({notebook_base})\n\n{notebook_intro_text}')
+    if add_intro:
+        toc_body = notebook_intro
+    else:
+        toc_body = ""
 
     if tooltips:
-        return f'{prefix} <a href="{notebook_basename}" title="{notebook_tooltip}">{notebook_title}</a>\n'
+        return f'{prefix} <a href="{notebook_basename}" title="{notebook_tooltip}">{notebook_title}</a><br>\n{toc_body}\n'
     else:
-        return f'{prefix} [{notebook_title}]({notebook_basename})'
+        return f'{prefix} [{notebook_title}]({notebook_basename})\n{toc_body}\n'
 
 def notebook_toc(public_chapters, appendices, booktitle):
     if booktitle:
@@ -84,9 +89,9 @@ def notebook_toc(public_chapters, appendices, booktitle):
         if (notebook_title.startswith("Part ") or
             notebook_title.startswith("Appendices")):
             # chapter_toc += "\n### " + notebook_title + "\n\n"
-            chapter_toc += "\n" + notebook_toc_entry(notebook, "###") + "\n"
+            chapter_toc += "\n" + notebook_toc_entry(notebook, "###", add_intro=True) + "\n"
         else:
-            chapter_toc += notebook_toc_entry(notebook, "*") # repr(counter) + ".")
+            chapter_toc += notebook_toc_entry(notebook, "####", add_intro=True) # repr(counter) + ".")
             counter += 1
 
     # appendix_toc = "### [Appendices](99_Appendices.ipynb)\n\n"
@@ -97,8 +102,8 @@ def notebook_toc(public_chapters, appendices, booktitle):
 While the chapters of this book can be read one after the other, there are many possible paths through the book. In this graph, an arrow _A_ → _B_ means that chapter _A_ is a prerequisite for chapter _B_. You can pick arbitrary paths in this graph to get to the topics that interest you most:
 """
 
-    sitemap_code_1 = "# ignore\nfrom IPython.display import SVG"
-    sitemap_code_2 = "# ignore\nSVG(filename='PICS/Sitemap.svg')"
+    sitemap_code_1 = "# ignore\nfrom bookutils import InteractiveSVG"
+    sitemap_code_2 = "# ignore\nInteractiveSVG(filename='PICS/Sitemap.svg')"
 
     toc_notebook = nbformat.v4.new_notebook(
         cells=[
