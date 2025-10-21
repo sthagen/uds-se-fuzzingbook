@@ -35,7 +35,7 @@ RUN apt-get install -y git python3 python-is-python3 pip npm gcc
 RUN echo "This is ${PROJECT} with $(python --version)" 1>&2
 
 # Install graphviz
-# We do this now to get informed about any errors
+# For some reason, this may fail when installing via 'apt.txt' (see below)
 RUN apt-get install -y graphviz libgraphviz-dev
 
 # Install jupyter
