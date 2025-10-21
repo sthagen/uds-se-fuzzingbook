@@ -14,8 +14,7 @@
 
 # This is needed for drawing trees
 graphviz
-# libgraphviz-dev
-graphviz-dev
+libgraphviz-dev
 
 # FuzzManager needs this
 clang
