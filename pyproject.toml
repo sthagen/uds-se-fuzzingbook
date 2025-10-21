@@ -58,7 +58,7 @@ dependencies = [
     # 'pyan@git+https://github.com/uds-se/pyan#egg=pyan',
     'pydriller>=2.0',
     'pyparsing==2.4.7',  # newer versions conflict with bibtexparser
-    'pygraphviz>=1.9',
+    'pygraphviz>=1.9', # in case of trouble, see https://pygraphviz.github.io/documentation/stable/install.html
     'Pygments>=2.7.1',
     'python-magic>=0.4.18',
     'requests>=2.26.0',
@@ -74,7 +74,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["code"]
+where = ["python_code"]
 exclude = ["fuzzingbook*"]
 
 [project.urls]
