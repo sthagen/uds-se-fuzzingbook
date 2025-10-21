@@ -74,7 +74,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["code"]
+where = ["python_code"]
 exclude = ["fuzzingbook*"]
 
 [project.urls]
