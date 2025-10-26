@@ -59,4 +59,5 @@ parts:
     chapters:
     - file: ReleaseNotes
     - file: Importing
+    - file: Copyright
     - file: Guide_for_Authors

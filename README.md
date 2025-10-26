@@ -20,7 +20,7 @@
 &nbsp;
 [![License: MIT (Code), CC BY-NC-SA (Book)](https://img.shields.io/badge/License-MIT_(Code),_CC_BY--NC--SA_4.0_(Book)-blue.svg)](https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md)
 
-# About this Book
+# The Fuzzing Book
 
 __Welcome to "The Fuzzing Book"!__ 
 Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by _automating_ software testing, specifically by _generating tests automatically_.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book – even with executable code. 
@@ -44,15 +44,17 @@ YouTubeVideo("w4u5gCgPlmg")
 
 ## A Textbook for Paper, Screen, and Keyboard
 
-You can use this book in four ways:
+You can use this book in multiple ways:
 
-* You can __read chapters in your browser__.  Check out the list of chapters in the menu above, or start right away with the [introduction to testing](https://www.fuzzingbook.org/html/Intro_Testing.html) or the [introduction to fuzzing](https://www.fuzzingbook.org/html/Fuzzer.html).  All code is available for download.
+* You can __read chapters in your browser__.  Check out the list of chapters in the menu above, or start right away with the [introduction to testing](https://www.fuzzingbook.org/html/Intro_Testing.html) or the [introduction to fuzzing](https://www.fuzzingbook.org/html/Fuzzer.html).
 
-* You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you to edit and extend the code, experimenting _live in your browser._  Simply select "Resources → Edit as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/HEAD?labpath=docs/notebooks/Fuzzer.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
+* You can __interact with chapters as Jupyter Notebooks__.  This allows you to edit and extend the code, experimenting _live in your browser._  Select "Binder" at the top of any chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/HEAD?labpath=docs/notebooks/Fuzzer.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
 
-* You can __use the code in your own projects__.  You can download the code as Python programs; simply select "Resources → Download Code" for one chapter or "Resources → All Code" for all chapters.  These code files can be executed, yielding (hopefully) the same results as the notebooks.  Even easier: [Install the fuzzingbook Python package](https://www.fuzzingbook.org/html/Importing.html).
+* You can __use the code in your own projects__.  You can [download and install the code and/or the notebooks on your machine](https://www.fuzzingbook.org/html/Importing.html).  These code files can be executed, yielding (hopefully) the same results as the notebooks.
 
+<!--
 * You can __present chapters as slides__.  This allows for presenting the material in lectures.  Just select "Resources → View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Fuzzer.slides.html" target=_blank>Try viewing the slides for the introduction to fuzzing.</a>
+-->
 
 ## Who this Book is for
 
