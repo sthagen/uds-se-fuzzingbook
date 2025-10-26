@@ -507,7 +507,7 @@ $(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(SH
 	@-$(RM) -fr $(TMPDIR)
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
-# The psot-html.py script
+# The post-html.py script
 POST_HTML ?= $(SHARED)utils/post_html.py
 
 # Its options
@@ -781,6 +781,8 @@ endif
 JUPYTER_BOOK = jupyter-book
 jb jupyter-book: $(JB_LINKS) _build/index.html
 jb-links: $(JB_LINKS)
+	
+PATCH_JB ?= $(SHARED)utils/patch_jb.py
 
 JB_LINKS = $(FULL_NOTEBOOKS)/_config.yml $(FULL_NOTEBOOKS)/_toc.yml $(FULL_NOTEBOOKS)/_build
 
@@ -795,6 +797,7 @@ $(FULL_NOTEBOOKS)/_build: _build
 
 _build/index.html: $(FULLS)
 	cd $(FULL_NOTEBOOKS); $(JUPYTER_BOOK) build .
+	$(PYTHON) $(PATCH_JB) _build/html/*.html
 
 
 ## Some checks
@@ -1303,7 +1306,7 @@ binder/binder.log: .FORCE
 
 
 ## Running Jupyter in docker
-.PHONY: docker docker-image docker-push docker-release docker-shell docker-run
+.PHONY: docker docker-image docker-push docker-release docker-shell docker-root docker-run
 DOCKER_USERNAME = zeller24
 GIT_HASH = $(shell git log --format="%h" -n 1)
 DOCKER_TAG = $(DOCKER_USERNAME)/$(PROJECT)
@@ -1319,6 +1322,8 @@ docker-image: $(DOCKERFILE) $(SOURCES) binder/postBuild
 # Once the image is built, access it via a shell
 docker-shell:
 	docker run -it --rm $(DOCKER_TAG) bash
+docker-root:
+	docker run -it --rm --user root $(DOCKER_TAG) bash
 
 # Main usage: run jupyter lab in the image
 docker-run docker:
